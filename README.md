@@ -1,0 +1,1 @@
+install_github("JEFworks/brainmapr")

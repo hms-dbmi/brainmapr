@@ -1,0 +1,14 @@
+Package: brainmapr
+Type: Package
+Title: Visualizes ISH gene expression data from the Allen Brain Atlas
+Version: 0.1
+Date: 2015-03-16
+Author: Jean Fan
+Maintainer: Jean Fan <jeanfan@fas.harvard.edu>
+Description: 
+License: MIT
+LazyData: TRUE
+Suggests: knitr
+VignetteBuilder: knitr
+Imports: rgl,
+    lattice
