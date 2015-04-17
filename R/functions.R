@@ -132,39 +132,59 @@ get.children <- function(nested.list, sid) {
 #'
 get.structure.ids <- function(nested.list, name) {
   sid <- get.id(nested.list, name)
-  cids <- c(sid, get.children(structure.id, sid))
+  cids <- c(sid, get.children(nested.list, sid))
   return(cids)
 }
+
 
 #####
 ## Plotting functions
 #####
 
-#' Helper function for 3D plotting
+
+#' Plot slice of 3D volume
 #'
-#' @param exp vector representation of volume
-#' @param x x-dimension of volume
-#' @param y y-dimension of volume
-#' @param z z-dimension of volume
+#' @param mat3D 3D volume
+#' @param direction Direction of slice = c('axial', 'sagital', 'coronal')
+#' @param slice Index of slice; limited to dimensions of mat3D
+#' @param col Color
+#' @param t Threshold used to remove noise
+#' @param add Boolean whether to overlay onto existing plot
 #'
-plot.energy <- function(exp, x, y, z) {
-  eyv <- as.data.frame(as.table(exp))
-  col <- colorRampPalette(c("white","black","red","yellow"),space="Lab")(1024)
-  ## normalize
-  vi <- eyv[,4]>0;
-  pc <- col[pmax(1,round(eyv[,4]/max(eyv[,4])*length(col)))]
-  ## 3D plot
-  rgl::plot3d(
-    as.integer(eyv[vi,1]),
-    as.integer(eyv[vi,2]),
-    as.integer(eyv[vi,3]),
-    col=pc[vi],
-    alpha=eyv[vi,4]/max(eyv[vi,4]),
-    xlim=c(0,x),
-    ylim=c(0,y),
-    zlim=c(0,z)
-  )
+#' @example
+#' plot.slice.xray(vol3D, 75, t=8)
+#'
+plot.slice <- function(mat3D, slice, col=colorRampPalette(c("white","black","red","yellow"),space="Lab")(100), t=0, add=F) {
+  mat.t <- mat3D[,,slice]
+  image(mat.t, col=col, zlim=c(t, max(mat.t, na.rm=T)), asp=1, add=add)  # fix aspect ratio
 }
+#' Set the colors to look more like an x-ray
+plot.slice.xray <- function(mat3D, slice, col=colorRampPalette(c("white", "black"),space="Lab")(100), t=0, add=F) {
+  plot.slice(mat3D, slice, col, t=t, add=add)
+}
+
+
+#' Plot flat projection of a 3D volume
+#'
+#' @param mat3D 3D volume
+#' @param col Color
+#' @param t Threshold used to remove noise
+#' @param add Boolean whether to overlay onto existing plot
+#'
+#' @example
+#' plot.projection.xray(vol3D, t=8)
+#'
+plot.projection <- function(mat3D, col=colorRampPalette(c("white","black","red","yellow"),space="Lab")(100), t=0, add=F) {
+  # threshold to get rid of noise
+  mat3D[mat3D <= t] <- 0
+  projmat <- apply(mat3D, 2, rowSums, na.rm=T)
+  image(projmat, col=col, zlim=c(t, max(projmat, na.rm=T)), asp=1, add=add)
+}
+#' Set the colors to look more like an x-ray
+plot.projection.xray <- function(mat3D, col=colorRampPalette(c("white", "black"),space="Lab")(100), t=0, add=F) {
+  plot.projection(mat3D, col, t=t, add=add)
+}
+
 
 #' Plot the volume or expression of a single gene in a structure
 #'
@@ -181,53 +201,39 @@ plot.energy <- function(exp, x, y, z) {
 #'   structure.plot(cids, array(mat[gene,], dim=dim(gannot3D)), gannot3D, plot=T)
 #'
 structure.plot <- function(cids, vol, annot, plot=F) {
-  tvol <- vol
   ## remove structures not in cids
-  tvol[!(annot %in% cids)] <- NA
+  vol[!(annot %in% cids)] <- NA
   if(plot) {
-    plot.energy(tvol, dim(annot)[1], dim(annot)[2], dim(annot)[3])
+    plot.energy(vol, dim(annot)[1], dim(annot)[2], dim(annot)[3])
   }
-  return(tvol)
+  return(vol)
 }
 
-#' Plot total expression of a set of genes in intersecting detection region
-#'
-#' @param gl Gene list
-#' @param expmat 3D volume of expression
-#' @param gannot 3D annotation of volume with structure IDs
-#' @param plot Boolean of whether to make 3D plot
-#' @return exp3D 3D volume restricted to total gene expression of interest
-#'
-#' @example
-#' gl <- c('Hes6', 'Gadd45g', 'Eomes', 'Mfng', 'Sertad4', 'Neurog2', 'Insm1', 'Sdc3')
-#' gene.plot(gl, mat, gannot3D, plot=T)
-#'
-gene.plot <- function(gl, expmat, gannot, plot=F) {
 
-  gl.have <- gl[gl %in% rownames(expmat)]
-  print(gl.have)
-  if(length(gl.have)==0) {
-    print('No genes available')
-    return(NA)
-  }
-
-  exp <- expmat[gl.have,]
-  ## none = -1 (ie. all expressed)
-  if(length(gl.have) > 1) {
-    intersect <- apply(exp, 2, function(x) { sum(x!=-1)==nrow(exp) })
-    #print(table(intersect))
-    #exp.int <- colMeans(exp)
-    exp.int <- colSums(exp, na.rm=T)
-    exp.int[!intersect] <- NA
-  } else {
-    exp.int <- exp
-  }
-
-  exp3D <- array(exp.int, dim=dim(gannot))
-  if(plot) {
-    plot.energy(exp3D, dim(gannot)[1], dim(gannot)[2], dim(gannot)[3])
-  }
-  return(exp3D)
+#' Helper function for 3D plotting
+#'
+#' @param exp vector representation of volume
+#' @param x x-dimension of volume
+#' @param y y-dimension of volume
+#' @param z z-dimension of volume
+#'
+plot.energy <- function(exp, x, y, z) {
+  eyv <- as.data.frame(as.table(exp))
+  col <- colorRampPalette(c("white","black","red","yellow"),space="Lab")(100)
+  # normalize
+  vi <- eyv[,4]>0;
+  pc <- col[pmax(1,round(eyv[,4]/max(eyv[,4])*length(col)))]
+  # 3D plot
+  rgl::plot3d(
+    as.integer(eyv[vi,1]),
+    as.integer(eyv[vi,2]),
+    as.integer(eyv[vi,3]),
+    col=pc[vi],
+    alpha=eyv[vi,4]/max(eyv[vi,4]),
+    xlim=c(0,x),
+    ylim=c(0,y),
+    zlim=c(0,z)
+  )
 }
 
 #' Plot weighted total expression of a set of genes
@@ -239,25 +245,30 @@ gene.plot <- function(gl, expmat, gannot, plot=F) {
 #' @param plot Boolean of whether to make 3D plot
 #' @return exp3D 3D volume restricted to weighted gene expression of interest
 #'
-gene.plot.weighted <- function(gl, weights, expmat, gannot, plot=F) {
+gene.plot <- function(gl, expmat, gannot, t=0, weights=rep(1, length(gl)), plot=F) {
 
+  # see what genes we have ISH data available
   gl.have <- gl[gl %in% rownames(expmat)]
+  gl.nothave <- gl[!(gl %in% rownames(expmat))]
   weights.have <- weights[gl %in% rownames(expmat)]
-  print(gl.have)
-  print(weights.have)
   if(length(gl.have)==0) {
     print('No genes available')
     return(NA)
+  } else {
+    print('Genes available:')
+    print(gl.have)
+    print('Genes not available:')
+    print(gl.nothave)
   }
 
+  # restrict to what we have
   exp <- expmat[gl.have,]
-  exp[exp < 0] <- 0
-  # row normalize in case one gene just has higher detection due to better probes
-  #exp <- t(t(exp) / rowMeans(exp))
+  # threshold to get rid of noise
+  exp[exp < t] <- 0
   exp <- exp * weights.have
   if(length(gl.have) > 1) {
-    #exp.int <- colSums(exp, na.rm=T)
-    exp.int <- colMeans(exp, na.rm=T)
+    exp.int <- colSums(exp, na.rm=T)
+    #exp.int <- colMeans(exp, na.rm=T)
   } else {
     exp.int <- exp
   }
@@ -269,68 +280,6 @@ gene.plot.weighted <- function(gl, weights, expmat, gannot, plot=F) {
   return(exp3D)
 }
 
-#' Plot slice of 3D volume
-#'
-#' @param mat3D 3D volume
-#' @param direction Direction of slice = c('axial', 'sagital', 'coronal')
-#' @param slice Index of slice; limited to dimensions of mat3D
-#' @param col Color
-#' @param t Threshold used to remove noise
-#'
-#' @example
-#' gp <- gene.plot(gl, mat, gannot3D, plot=T)
-#' plot.slice(gp, 'x', 200)
-#' plot.slice(gp, 'y', 60)
-#' plot.slice(gp, 'z', 50)
-#'
-plot.slice <- function(mat3D, direction, slice, col=colorRampPalette(c("white","black","red","yellow"),space="Lab")(100), t=1) {
-  mat3D.t <- mat3D
-  ## threshold to get rid of noise
-  mat3D.t[mat3D <= t] <- 0
-  mat3D.t[mat3D == -1] <- NA
-  # axial
-  if(direction=='y') {
-    lattice::levelplot(mat3D.t[,slice,], col.regions=col)
-  }
-  # coronal
-  if(direction=='x') {
-    lattice::levelplot(mat3D.t[slice,,], col.regions=col)
-  }
-  # sagital
-  if(direction=='z') {
-    lattice::levelplot(mat3D.t[,,slice], col.regions=col)
-  }
-}
-
-#' Plot flat projection of a 3D volume
-#'
-#' @param mat3D 3D volume
-#' @param col Color
-#' @param t Threshold used to remove noise
-#'
-#' @example
-#' gl <- c('Hes6', 'Gadd45g', 'Eomes', 'Mfng', 'Sertad4', 'Neurog2', 'Insm1', 'Sdc3')
-#' gp <- gene.plot(gl, mat, gannot3D, plot=T)
-#' plot.projection(gp)
-plot.projection <- function(mat3D, col, t=1, zlim=NULL) {
-  mat3D.t <- mat3D
-  ## threshold to get rid of noise
-  mat3D.t[mat3D <= t] <- 0
-  mat3D.t[mat3D == -1] <- NA
-  projmat <- apply(mat3D.t, 2, rowSums, na.rm=T)
-  #projmat <- apply(mat3D.t, 2, rowMeans, na.rm=T)
-
-  if( is.null(zlim) ) {
-    zlim <- c(0, max(projmat, na.rm=T))
-  }
-  projmat[projmat<zlim[1]] <- zlim[1]
-  projmat[projmat>zlim[2]] <- zlim[2]
-  lattice::levelplot(projmat, col.regions=col, at=seq(zlim[1], zlim[2], length.out=100))
-}
-#' Set the colors to look more like an x-ray
-plot.projection.xray <- function(mat3D, col=colorRampPalette(c("black","white"),space="Lab")(1024), t=1, zlim=NULL) {
-  plot.projection(mat3D, col, t=t, zlim=zlim)
-}
 
 #####
 ## Analysis functions
