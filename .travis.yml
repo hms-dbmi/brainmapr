@@ -2,3 +2,6 @@ language: r
 
 # Be strict when checking our package
 warnings_are_errors: true
+
+# By default, Travis CI will find all R packages listed as dependencies in your package's DESCRIPTION file
+# and install them from CRAN so no need to augment for now
