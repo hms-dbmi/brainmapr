@@ -162,7 +162,11 @@ plot.slice <- function(mat3D, slice, col=colorRampPalette(c("white","black","red
 plot.slice.xray <- function(mat3D, slice, col=colorRampPalette(c("white", "black"),space="Lab")(100), t=0, add=F) {
   plot.slice(mat3D, slice, col, t=t, add=add)
 }
-
+#' Compare 2 regions
+plot.slice.comp <- function(mat3D, slice, col=colorRampPalette(c("green","blue", "black","red","yellow"),space="Lab")(100), add=F) {
+  mat.t <- mat3D[,,slice]
+  image(mat.t, col=col, zlim=c(min(mat.t, na.rm=T), max(mat.t, na.rm=T)), asp=1, add=add)  # fix aspect ratio
+}
 
 #' Plot flat projection of a 3D volume
 #'
@@ -282,7 +286,11 @@ gene.plot <- function(gl, expmat, gannot, t=0, weights=rep(1, length(gl)), plot=
 
 
 #####
-## Analysis functions
+## DEVELOPMENT ZONE
+#####
+
+#####
+## Analysis functions; UNDER DEVELOPMENT
 #####
 
 #' Helper function to estimate the contrast of an image as a the standard error
@@ -342,7 +350,7 @@ get.contrast.sig <- function(gl, mat, gannot, cids=NA, t=1, n=100, plot=F) {
 }
 
 #####
-## Comparison functions
+## Comparison functions; UNDER DEVELOPMENT
 #####
 
 #' Relative expression of two groups
@@ -414,22 +422,4 @@ gene.plot.weighted.comp2 <- function(gl1, weights1, gl2, weights2, expmat, ganno
     plot.energy(exp3D, dim(gannot)[1], dim(gannot)[2], dim(gannot)[3])
   }
   return(exp3D)
-}
-
-plot.slice.comp <- function(mat3D, direction, slice, col=colorRampPalette(c("green","blue", "black","red","yellow"),space="Lab")(100)) {
-  mat3D.t <- mat3D
-  ## threshold to get rid of noise
-  mat3D.t[mat3D == -1] <- NA
-  # axial
-  if(direction=='y') {
-    lattice::levelplot(mat3D.t[,slice,], col.regions=col)
-  }
-  # coronal
-  if(direction=='x') {
-    lattice::levelplot(mat3D.t[slice,,], col.regions=col)
-  }
-  # sagital
-  if(direction=='z') {
-    lattice::levelplot(mat3D.t[,,slice], col.regions=col)
-  }
 }
