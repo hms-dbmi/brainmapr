@@ -10,5 +10,6 @@ License: MIT
 LazyData: TRUE
 Suggests: knitr
 VignetteBuilder: knitr
-Imports: rgl,
+Suggests: 
+    rgl,
     lattice
