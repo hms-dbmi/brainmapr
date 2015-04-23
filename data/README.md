@@ -27,7 +27,16 @@ Processed data are available for all developing mouse stages under `data-raw/RDa
 - `P4.*.RData` - data for post-natal 4 day old mouse  
 - `P14.*.RData` - data for post-natal 14 day old mouse  
 - `P28.*.RData` - data for post-natal 28 day old mouse  
-- `P56.*.RData` - data for post-natal 56 day old mouse  
+- `P56.*.RData` - data for post-natal 56 day old mouse 
+
+Each `RData` file contains:
+- `annot3D` - 3D array containing structure annotations for each pixel  
+- `vol3D` - 3D array containing stain per pixel for whole mouse  
+- `gannot3D` - 3D array containg structure annotations for each voxel  
+- `mat` - matrix where each row corresponds to the average energy per voxel for a gene  
+
+`sids.RData` contains:
+- `structure.id` - nested list of structure names to IDs; same for every developing mouse stage
 
 See `data-raw/scripts/to_RData.R` for more information.
 
@@ -35,7 +44,7 @@ See `data-raw/scripts/to_RData.R` for more information.
 
 # Raw Data 
 
-Raw data are too big to included in the package. The following steps were used to download and process data stored in `data-raw/`. All raw data are publicly available for download through [the Allen Brain Atlas website](http://www.brain-map.org/). 
+Raw data are too big to included in the package. The following steps were used to download and process data stored in `data-raw/`. Raw data folders have been zipped to save space. All raw data are publicly available for download through [the Allen Brain Atlas website](http://www.brain-map.org/). 
 
 ## Source
 
