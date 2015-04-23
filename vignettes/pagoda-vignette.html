@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title></title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<p><code>brainmapr</code> visualizes 3D ISH gene expression data from the Allen Brain Atlas. Our goal is to spatially place a group of neuronal cells within a region of the brain based on their gene expression signature. This vignette recreates figures in [paper]</p>
+
+<p>Load embryonic 13.5 day old mouse data. </p>
+
+<pre><code class="r">library(brainmapr)
+# Load data
+load(&#39;../data-raw/RData/sids.RData&#39;)
+load(&#39;../data-raw/RData/E13.5.energy.RData&#39;)
+load(&#39;../data-raw/RData/E13.5.annot.RData&#39;)
+</code></pre>
+
+<p>Plot slice of whole mouse.</p>
+
+<pre><code class="r">plot.projection.xray(vol3D, t=15)
+s &lt;- 26 # slice
+s2 &lt;- round(s/dim(gannot3D)[3]*dim(vol3D)[3]) # convert
+plot.slice.xray(vol3D, s2, t=15)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-2-1.png" alt="plot of chunk unnamed-chunk-2"> <img src="figure/unnamed-chunk-2-2.png" alt="plot of chunk unnamed-chunk-2"> </p>
+
+<p>Get forebrain.</p>
+
+<pre><code class="r"># Plot x-ray of just brain component
+# Forebrain
+cids1 &lt;- get.structure.ids(structure.id, &#39;forebrain&#39;)
+cids2 &lt;- get.structure.ids(structure.id, &#39;ventricles, forebrain&#39;)
+cids &lt;- c(cids1, cids2)
+# Plot brain component; note section annotation data is for the left hemisphere only
+sect3D &lt;- structure.plot(cids, vol3D, annot3D, plot=F)
+plot.projection.xray(vol3D, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.projection(sect3D, t=8, add=T)
+plot.slice.xray(vol3D, s2, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.slice(sect3D, s2, t=8, add=T)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-3-1.png" alt="plot of chunk unnamed-chunk-3"> <img src="figure/unnamed-chunk-3-2.png" alt="plot of chunk unnamed-chunk-3"> </p>
+
+<p>Gene expression signatures for proximal distal cell group identified by <code>pagoda</code>.</p>
+
+<pre><code class="r"># Plot gene expression
+# Upregulated genes
+gl1  &lt;- c(&quot;Dlx2&quot;, &quot;Dlx6as1&quot;, &quot;Sp9&quot;, &quot;Pbx3&quot;, &quot;Dlx5&quot;, &quot;Dlx1&quot;, &quot;Necap1&quot;, &quot;Zfhx3&quot;, &quot;Pou3f4&quot;, &quot;Sec63&quot;, &quot;Gdi1&quot;, &quot;Rbp1&quot;, &quot;Rbmx&quot;, &quot;Nrxn3&quot;, &quot;Map3k13&quot;, &quot;Meis1&quot;, &quot;Slc6a1&quot;, &quot;Sp8&quot;, &quot;Pbx1&quot;, &quot;Dcx&quot;, &quot;Gad2&quot;, &quot;Sirt7&quot;, &quot;Hmgcll1&quot;)
+# lb * cZ
+weights1 &lt;- c(46.26915, 38.06011, 33.33369, 36.56755, 43.52929, 39.49066, 14.35763, 4.262908, 8.896505, 3.521533, 1.94611, 5.004284, 1.760767, 9.089976, 6.999584, 8.525134, 4.538585, 3.559675, 1.706482, 2.031702, 3.470824, 6.661706, 5.606481)
+gp3D &lt;- gene.plot(gl1, mat, gannot3D, plot=F, weights=weights1)
+</code></pre>
+
+<pre><code>## [1] &quot;Genes available:&quot;
+##  [1] &quot;Dlx2&quot;   &quot;Sp9&quot;    &quot;Pbx3&quot;   &quot;Dlx5&quot;   &quot;Dlx1&quot;   &quot;Zfhx3&quot;  &quot;Pou3f4&quot;
+##  [8] &quot;Meis1&quot;  &quot;Slc6a1&quot; &quot;Sp8&quot;    &quot;Pbx1&quot;   &quot;Dcx&quot;    &quot;Gad2&quot;  
+## [1] &quot;Genes not available:&quot;
+##  [1] &quot;Dlx6as1&quot; &quot;Necap1&quot;  &quot;Sec63&quot;   &quot;Gdi1&quot;    &quot;Rbp1&quot;    &quot;Rbmx&quot;    &quot;Nrxn3&quot;  
+##  [8] &quot;Map3k13&quot; &quot;Sirt7&quot;   &quot;Hmgcll1&quot;
+</code></pre>
+
+<pre><code class="r">gpsect3D &lt;- structure.plot(cids, gp3D, gannot3D, plot=F)
+plot.projection.xray(vol3D, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.projection(gpsect3D, t=1, add=T)
+plot.slice.xray(vol3D, s2, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.slice(gpsect3D, s, t=1, add=T)
+# Downregulated genes
+gl2 &lt;- c(&quot;Celsr1&quot;, &quot;Sp1&quot;, &quot;Adck2&quot;, &quot;Dkk3&quot;, &quot;Bms1&quot;, &quot;Eif2c3&quot;, &quot;Bhlhe22&quot;, &quot;Rcan2&quot;, &quot;Tmem115&quot;, &quot;Zfp654&quot;, &quot;Smap1&quot;, &quot;Map2k6&quot;, &quot;Cadm4&quot;, &quot;B4galt4&quot;, &quot;Etl4&quot;, &quot;Qsox2&quot;, &quot;Hist1h1c&quot;, &quot;1810041L15Rik&quot;, &quot;Thap7&quot;, &quot;Fuca1&quot;, &quot;Stard4&quot;, &quot;Rap1gds1&quot;, &quot;Fam84b&quot;, &quot;Pigh&quot;, &quot;Ogfrl1&quot;, &quot;Mdm1&quot;, &quot;Syde2&quot;, &quot;Gm166&quot;, &quot;Ccdc171&quot;, &quot;BC023829&quot;, &quot;9230110C19Rik&quot;,
+         &quot;Lin9&quot;, &quot;Clpp&quot;, &quot;Xrcc4&quot;, &quot;Vrk3&quot;, &quot;Cdk5rap1&quot;, &quot;Lrr1&quot;, &quot;Spty2d1&quot;, &quot;Ext2&quot;, &quot;Tex261&quot;, &quot;1810044D09Rik&quot;, &quot;Gpr156&quot;, &quot;2410127L17Rik&quot;, &quot;Pdp2&quot;, &quot;E2f8&quot;, &quot;Tenm4&quot;, &quot;D3Ertd751e&quot;, &quot;Prtg&quot;, &quot;Mrps26&quot;, &quot;Rabac1&quot;, &quot;Chaf1b&quot;, &quot;Gm17762&quot;, &quot;Trim3&quot;, &quot;Cpeb2&quot;, &quot;Rmi1&quot;, &quot;Klf16&quot;, &quot;Echdc1&quot;, &quot;Hdac7&quot;, &quot;Gadd45a&quot;, &quot;Myo7a&quot;, &quot;Safb2&quot;, &quot;Scml2&quot;, &quot;Pbk&quot;,
+         &quot;Slc16a1&quot;, &quot;Atp2b1&quot;, &quot;Polr3h&quot;, &quot;Mlst8&quot;, &quot;Cradd&quot;, &quot;Avl9&quot;, &quot;Ndc80&quot;, &quot;Ift74&quot;, &quot;Eomes&quot;, &quot;Slit2&quot;, &quot;Phf13&quot;, &quot;Oscp1&quot;, &quot;Cd9&quot;, &quot;Nufip1&quot;, &quot;Sft2d2&quot;, &quot;Col18a1&quot;, &quot;Mipep&quot;, &quot;Lamb1&quot;, &quot;Rrp15&quot;, &quot;Rfxap&quot;, &quot;Neurod2&quot;, &quot;Melk&quot;, &quot;Wdr35&quot;, &quot;Fam53b&quot;, &quot;Faim&quot;, &quot;Ankib1&quot;, &quot;Pim3&quot;, &quot;Tcn2&quot;, &quot;Sptlc1&quot;, &quot;Lmf1&quot;, &quot;2700050L05Rik&quot;, &quot;P4ha1&quot;, &quot;Ugdh&quot;,
+         &quot;2510003E04Rik&quot;, &quot;Unc50&quot;, &quot;Trappc6a&quot;, &quot;Urm1&quot;, &quot;Ccdc117&quot;, &quot;Zdhhc24&quot;, &quot;Osbpl5&quot;, &quot;Spg20&quot;, &quot;Prrc1&quot;, &quot;Sh3pxd2a&quot;, &quot;Tef&quot;, &quot;Cbln2&quot;, &quot;AI414108&quot;, &quot;Znrf3&quot;, &quot;Phlpp2&quot;, &quot;Mpp6&quot;, &quot;Dhx33&quot;, &quot;Spg21&quot;, &quot;Ankrd40&quot;, &quot;Smyd5&quot;, &quot;Fbln1&quot;, &quot;Sapcd2&quot;, &quot;Rnft1&quot;, &quot;Nfix&quot;, &quot;Wee1&quot;, &quot;Vkorc1l1&quot;, &quot;Zfp574&quot;, &quot;Nap1l2&quot;, &quot;Dusp14&quot;, &quot;Ccdc112&quot;, &quot;Epb4.1l2&quot;,
+         &quot;1810055G02Rik&quot;, &quot;Kctd3&quot;, &quot;Hap1&quot;, &quot;Ccdc40&quot;, &quot;Wdr3&quot;, &quot;Synpr&quot;, &quot;Arhgap31&quot;, &quot;Zc3h7a&quot;, &quot;Cenph&quot;, &quot;Gpank1&quot;, &quot;Kdm2a&quot;, &quot;Smad3&quot;, &quot;1190002N15Rik&quot;, &quot;Ptar1&quot;, &quot;Klf6&quot;, &quot;Lpar4&quot;, &quot;Uaca&quot;, &quot;Stk24&quot;, &quot;Tmem248&quot;, &quot;Lipt1&quot;, &quot;Hmga2&quot;, &quot;Rnf26&quot;, &quot;Asb1&quot;, &quot;Add3&quot;, &quot;Ankzf1&quot;, &quot;Fbxo25&quot;, &quot;Zfp955b&quot;, &quot;Fbxl6&quot;, &quot;Bcl2l12&quot;, &quot;Cystm1&quot;, &quot;Thop1&quot;, &quot;Trmt13&quot;,
+         &quot;Tmem179b&quot;, &quot;Slu7&quot;, &quot;Nucb1&quot;, &quot;Scd1&quot;, &quot;Nptx1&quot;, &quot;Ppap2c&quot;, &quot;Pcdh18&quot;, &quot;Nrxn1&quot;, &quot;Lap3&quot;, &quot;Asb3&quot;, &quot;Ano1&quot;, &quot;Arhgef25&quot;, &quot;Acad8&quot;, &quot;Pgap2&quot;, &quot;Fam179b&quot;, &quot;Tceb3&quot;, &quot;Tnik&quot;, &quot;Dap3&quot;, &quot;Slc25a24&quot;, &quot;E2f6&quot;, &quot;Sox3&quot;, &quot;Cyth3&quot;, &quot;Tspan12&quot;, &quot;1700102H20Rik&quot;, &quot;Dgkd&quot;, &quot;Maml1&quot;, &quot;Fgfr2&quot;, &quot;Klhdc4&quot;, &quot;Incenp&quot;, &quot;Vcam1&quot;, &quot;Atl3&quot;, &quot;Rai2&quot;, &quot;Tm7sf2&quot;, &quot;Napepld&quot;,
+         &quot;Fert2&quot;, &quot;Cldn12&quot;, &quot;Itpr1&quot;, &quot;Katnb1&quot;, &quot;Hyal2&quot;, &quot;Gys1&quot;, &quot;Mcu&quot;, &quot;Pacrgl&quot;, &quot;Aldoc&quot;, &quot;Lhpp&quot;, &quot;Pi4k2b&quot;, &quot;Rem2&quot;, &quot;Polr3a&quot;, &quot;Ptpn13&quot;, &quot;2310039H08Rik&quot;, &quot;Col11a1&quot;, &quot;Dph2&quot;, &quot;Ddrgk1&quot;, &quot;Tmem101&quot;, &quot;Gas2&quot;, &quot;Cdc45&quot;, &quot;Tmem126b&quot;, &quot;Pofut2&quot;, &quot;Cep68&quot;, &quot;Npc1&quot;, &quot;Lpar1&quot;, &quot;Adamts20&quot;, &quot;Bcl10&quot;, &quot;Mir135a-2&quot;, &quot;Snap23&quot;, &quot;Sesn1&quot;, &quot;Pde3b&quot;, &quot;Slk&quot;, &quot;Dennd1b&quot;,
+         &quot;Plk1s1&quot;, &quot;Trak1&quot;, &quot;Galnt7&quot;, &quot;E2f7&quot;, &quot;Rpia&quot;, &quot;2010204K13Rik&quot;, &quot;Mbd1&quot;, &quot;Tmem178&quot;, &quot;Gmds&quot;, &quot;2010107G23Rik&quot;, &quot;Rab30&quot;, &quot;Zbed3&quot;, &quot;Coasy&quot;, &quot;Fntb&quot;, &quot;Wnt8b&quot;, &quot;Ndn&quot;, &quot;Rspo3&quot;, &quot;Dnajb12&quot;, &quot;Map4k3&quot;, &quot;Caml&quot;, &quot;Tceal1&quot;, &quot;Cdpf1&quot;, &quot;C1galt1c1&quot;, &quot;Smap2&quot;, &quot;Ece2&quot;, &quot;Pvrl2&quot;, &quot;Noc4l&quot;, &quot;Trps1&quot;, &quot;Nubpl&quot;, &quot;Fgfbp3&quot;, &quot;Pold1&quot;, &quot;Sil1&quot;, &quot;Zmym1&quot;, &quot;2310035C23Rik&quot;,
+         &quot;Cluh&quot;, &quot;Rexo2&quot;, &quot;Frrs1l&quot;, &quot;Sstr2&quot;, &quot;Herc3&quot;, &quot;Slc25a36&quot;, &quot;Fahd1&quot;, &quot;Fam196a&quot;, &quot;Alcam&quot;, &quot;Atrip&quot;, &quot;Smpd2&quot;, &quot;Hdgfrp2&quot;, &quot;Tanc1&quot;, &quot;Pspc1&quot;, &quot;Gusb&quot;, &quot;Dgcr6&quot;, &quot;Slc30a10&quot;, &quot;Flrt2&quot;, &quot;Gdap2&quot;, &quot;Zfp770&quot;, &quot;Tmem110&quot;, &quot;Prr15&quot;, &quot;Hsd17b7&quot;, &quot;Per3&quot;, &quot;Tiparp&quot;, &quot;Gcat&quot;, &quot;AW554918&quot;, &quot;Ogfr&quot;, &quot;Gne&quot;, &quot;Ap4m1&quot;, &quot;Mlf1&quot;, &quot;Ppp4r2&quot;, &quot;Pms1&quot;, &quot;Tmed5&quot;, &quot;Mtg1&quot;,
+         &quot;Fars2&quot;, &quot;Dbndd1&quot;, &quot;Tmem251&quot;, &quot;Cdk2ap2&quot;, &quot;Dennd1a&quot;, &quot;Prdm5&quot;, &quot;Ercc3&quot;, &quot;Fam169a&quot;, &quot;Vps52&quot;, &quot;Nynrin&quot;, &quot;1700020I14Rik&quot;, &quot;Athl1&quot;, &quot;Asrgl1&quot;, &quot;2700099C18Rik&quot;, &quot;Obfc1&quot;, &quot;Necab3&quot;, &quot;Adnp2&quot;, &quot;Nckap5&quot;, &quot;Ptgr1&quot;, &quot;Ptpmt1&quot;, &quot;Zscan22&quot;, &quot;Msto1&quot;, &quot;Sdc4&quot;, &quot;Rgcc&quot;, &quot;Vkorc1&quot;, &quot;Hist1h4i&quot;, &quot;Tmem14a&quot;, &quot;Wfdc2&quot;, &quot;Baiap2l1&quot;, &quot;Gemin6&quot;, &quot;D330022K07Rik&quot;,
+         &quot;C430049B03Rik&quot;, &quot;Slc35b2&quot;, &quot;Ext1&quot;, &quot;Brca1&quot;, &quot;Rnf11&quot;, &quot;Zbtb17&quot;, &quot;Dtd2&quot;, &quot;Sap30l&quot;, &quot;Akip1&quot;, &quot;Zfp449&quot;, &quot;Mpp5&quot;, &quot;Kbtbd11&quot;, &quot;Zmym3&quot;, &quot;Tmed3&quot;, &quot;2700097O09Rik&quot;, &quot;Slc9a1&quot;, &quot;2810408I11Rik&quot;, &quot;Nup43&quot;, &quot;Zfp276&quot;, &quot;Gm15545&quot;, &quot;Zfyve16&quot;, &quot;Rcn3&quot;, &quot;Ccrn4l&quot;, &quot;Ift172&quot;, &quot;Pgs1&quot;, &quot;Rwdd3&quot;, &quot;Mettl23&quot;, &quot;Chrna3&quot;, &quot;Ttc8&quot;, &quot;Ndufaf1&quot;, &quot;Zfp719&quot;, &quot;Bre&quot;,
+         &quot;Dpm1&quot;, &quot;Gm11627&quot;, &quot;Exoc6b&quot;, &quot;Eme1&quot;, &quot;Ccdc138&quot;, &quot;Hunk&quot;, &quot;Wdr60&quot;, &quot;Fam173b&quot;, &quot;Cntn5&quot;, &quot;Grtp1&quot;, &quot;Nedd9&quot;, &quot;Gtf2h4&quot;, &quot;Tfap2c&quot;, &quot;Fut9&quot;, &quot;Osbpl11&quot;, &quot;0610007N19Rik&quot;, &quot;Fndc3c1&quot;, &quot;Slc17a7&quot;, &quot;Prosc&quot;, &quot;Ngly1&quot;, &quot;Nme3&quot;, &quot;Neurod1&quot;, &quot;Pcp4&quot;, &quot;Cdk19&quot;, &quot;Coq4&quot;, &quot;Smim8&quot;, &quot;Elmod3&quot;, &quot;Cad&quot;, &quot;2810002D19Rik&quot;, &quot;Sc5d&quot;, &quot;BC030867&quot;, &quot;Gpc3&quot;, &quot;Pafah2&quot;, &quot;Hadhb&quot;,
+         &quot;Usp25&quot;, &quot;Itm2a&quot;, &quot;Plekhf2&quot;, &quot;Pef1&quot;, &quot;Pcsk6&quot;, &quot;Dach2&quot;, &quot;Sat1&quot;, &quot;Prokr1&quot;, &quot;Zkscan17&quot;, &quot;Pold3&quot;, &quot;Nkrf&quot;, &quot;Mmd2&quot;, &quot;Alad&quot;, &quot;Enpp5&quot;, &quot;Man1b1&quot;, &quot;Traf3ip1&quot;, &quot;Fut10&quot;, &quot;Ptplb&quot;, &quot;Dnajb2&quot;, &quot;BC022687&quot;, &quot;Ift122&quot;, &quot;Jph1&quot;, &quot;1110012L19Rik&quot;, &quot;Cdk5rap2&quot;, &quot;Dym&quot;, &quot;Abhd6&quot;, &quot;A330048O09Rik&quot;, &quot;Nop14&quot;, &quot;Gm9958&quot;, &quot;Zufsp&quot;, &quot;Emx1&quot;, &quot;Qtrt1&quot;, &quot;Lman1&quot;, &quot;Ppp1r14a&quot;,
+         &quot;Stx8&quot;, &quot;Adck5&quot;, &quot;Tmem216&quot;, &quot;Plxna4&quot;, &quot;Pdha1&quot;, &quot;Appl2&quot;, &quot;Coil&quot;, &quot;Slc17a6&quot;, &quot;Hs3st1&quot;, &quot;Slc35a2&quot;, &quot;Zfp36l2&quot;, &quot;Atxn1l&quot;, &quot;Blvra&quot;, &quot;Cables2&quot;, &quot;Ttpal&quot;, &quot;2210016L21Rik&quot;, &quot;Lrrc57&quot;, &quot;Aspscr1&quot;, &quot;Spice1&quot;, &quot;Lmcd1&quot;, &quot;Bora&quot;, &quot;Ddx28&quot;, &quot;Gemin2&quot;, &quot;Gba&quot;, &quot;Ralb&quot;, &quot;Cdt1&quot;, &quot;Prelid2&quot;, &quot;Hey1&quot;, &quot;5330426P16Rik&quot;, &quot;A730017C20Rik&quot;, &quot;Cntrob&quot;, &quot;Bivm&quot;, &quot;Rtn2&quot;, &quot;Neurod6&quot;,
+         &quot;Sh3gl1&quot;, &quot;Phldb2&quot;, &quot;Galnt14&quot;, &quot;Pgm1&quot;, &quot;Esco2&quot;, &quot;Msl3&quot;, &quot;Cbln4&quot;, &quot;Zfp763&quot;, &quot;Mecr&quot;, &quot;Gpr89&quot;, &quot;Lsm10&quot;, &quot;Coq9&quot;, &quot;Akap10&quot;, &quot;Shmt2&quot;, &quot;Nhlh1&quot;, &quot;Ubox5&quot;, &quot;Lrrn1&quot;, &quot;Cep57l1&quot;, &quot;Adamts10&quot;, &quot;Mterfd3&quot;, &quot;Prim2&quot;, &quot;Tnfaip8&quot;, &quot;Gpr19&quot;, &quot;Masp1&quot;, &quot;Jag1&quot;, &quot;Enoph1&quot;, &quot;Mgme1&quot;, &quot;Suclg2&quot;, &quot;Pinx1&quot;, &quot;Ube2t&quot;, &quot;Arl6&quot;, &quot;Cers2&quot;, &quot;2810055G20Rik&quot;, &quot;Tmem132c&quot;, &quot;Atic&quot;, &quot;Actr1b&quot;,
+         &quot;Asah1&quot;, &quot;Nfia&quot;, &quot;Rprd1a&quot;, &quot;Neurog2&quot;, &quot;0610031J06Rik&quot;, &quot;Otx1&quot;, &quot;Litaf&quot;, &quot;Nr2e1&quot;, &quot;Plp2&quot;, &quot;Ankrd13c&quot;, &quot;Uchl5&quot;, &quot;Taf12&quot;, &quot;Serpini1&quot;, &quot;Gja1&quot;, &quot;Nfib&quot;)
+weights2 &lt;- c(13.61864, 14.61415, 12.08321, 10.71039, 14.41029, 9.096843, 11.57122, 11.90863, 11.66958, 12.82011, 12.98447, 15.12115, 9.209305, 12.82725, 14.80067, 13.23838, 10.12313,
+              14.07884, 14.08529, 11.53182, 13.09685, 14.08529, 13.67344, 11.37786, 11.37786, 13.36228, 10.41103, 10.10093, 9.606883, 14.74488, 12.03396, 14.68973, 17.09652, 12.03396,
+              13.61946, 10.7984, 9.151281, 10.74603, 11.32915, 10.91604, 12.0034, 11.02835, 14.56363, 12.7291, 10.22225, 13.8366, 11.24725, 11.08771, 10.24773, 12.09757, 15.28999, 10.66939,
+              14.44988, 12.52891, 12.5483, 10.69896, 10.69896, 13.22628, 12.72598, 11.37924, 13.32341, 10.625, 16.38446, 13.25959, 15.63164, 14.19521, 9.473503, 11.76694, 14.00611, 14.95135,
+              17.24502, 13.84699, 14.8664, 10.87371, 10.61886, 13.59214, 12.99748, 14.78145, 10.87371, 14.44556, 10.53676, 14.53523, 10.9089, 14.74563, 14.8464, 12.45732, 12.71329, 14.8464,
+              14.5051, 12.0307, 10.06825, 11.00681, 11.34999, 12.69911, 13.39316, 14.34291, 10.73571, 13.82759, 10.05256, 14.38757, 15.73909, 12.62815, 11.59022, 12.63262, 11.59432,
+              11.8539, 10.72908, 13.93049, 11.42467, 13.07825, 14.91031, 13.26324, 12.16026, 14.10128, 10.88062, 11.75469, 15.06536, 14.71703, 11.49496, 13.49787, 14.8912, 10.79829,
+              14.10745, 11.32921, 15.51246, 11.24218, 12.98575, 15.34549, 13.34012, 10.12108, 12.9131, 11.95335, 12.3896, 11.95335, 14.57087, 10.81909, 16.05413, 14.13461, 12.5641, 13.61111,
+              11.27084, 12.58141, 12.66878, 11.62033, 10.59083, 16.45585, 11.46658, 18.81919, 15.06599, 15.50395, 15.59154, 11.33856, 15.55755, 10.54749, 15.20597, 13.71174, 11.35899, 14.2745,
+              13.12901, 15.60724, 15.95995, 15.25453, 14.55213, 11.90629, 11.37712, 14.99311, 13.67019, 16.31603, 16.66881, 12.52365, 14.58196, 12.37257, 12.04586, 15.4319, 16.05273, 14.74214,
+              16.69591, 11.63385, 15.54141, 13.76525, 15.18618, 16.25187, 10.21293, 14.3869, 11.36743, 15.63022, 16.16498, 15.89852, 16.34262, 10.6738, 10.8517, 11.38539, 12.45277, 15.56597,
+              10.76802, 12.99281, 16.28551, 16.10753, 11.65793, 13.00968, 14.61361, 13.3661, 15.41557, 10.79827, 10.97676, 14.45719, 12.85084, 15.9743, 16.15279, 15.90458, 16.08463, 14.26838,
+              15.88367, 15.43498, 13.28126, 11.4865, 15.52472, 12.56336, 15.16577, 13.99917, 15.88367, 11.66597, 13.01205, 15.16577, 14.09358, 14.9015, 15.44011, 12.49463, 13.75309, 15.64076,
+              15.47179, 11.78375, 11.78375, 12.95313, 15.6517, 15.74165, 14.84213, 14.67065, 14.77473, 12.79275, 16.39635, 13.60356, 14.51291, 16.76647, 10.36636, 14.96362, 16.58618, 12.64003,
+              16.25147, 10.9246, 11.5566, 15.89032, 15.80004, 15.07775, 13.81375, 14.89718, 12.91089, 14.17489, 11.46631, 15.25832, 15.16804, 11.5566, 15.25832, 16.16118, 15.43889, 11.01488,
+              12.1886, 11.91774, 16.07089, 13.63317, 15.80004, 13.90403, 13.99432, 12.36917, 15.43889, 12.8206, 16.61261, 15.25832, 15.98061, 15.07775, 15.07775, 11.82746, 9.841166, 13.00117,
+              14.26518, 16.25147, 16.25147, 14.44575, 14.71661, 15.98061, 12.73032, 16.43204, 16.07556, 15.98636, 12.92251, 15.96586, 16.05658, 9.986869, 16.09098, 16.54553, 13.5527, 11.73354,
+              15.64746, 15.37637, 15.31162, 16.45403, 16.09669, 15.46323, 15.82922, 11.71179, 16.80268, 16.34359, 16.43541, 15.60905, 12.76269, 13.40542, 10.65088, 16.52723, 14.23178, 16.34359,
+              16.73998, 16.38034, 16.22932, 16.69038, 11.06544, 16.79128, 10.42703, 12.75515, 14.32643, 14.97343, 15.80529, 15.89772, 15.71286, 14.60372, 10.64724, 13.98703, 15.56888, 15.75423,
+              13.99346, 12.78873, 17.05163, 16.95896, 16.31026, 14.08613, 17.05163, 11.12063, 11.02796, 16.58827, 16.86629, 16.21759, 11.86201, 15.93957, 17.42232, 17.42232, 15.10552, 17.05163,
+              13.80812, 11.86201, 16.77362, 17.60767, 12.60338, 15.8469, 14.54949, 11.58399, 14.73484, 16.77362, 13.06674, 12.04735, 12.04735, 16.40293, 16.58827, 17.05163, 16.86629, 14.92018,
+              15.47621, 16.86629, 10.65727, 14.08613, 12.78873, 16.77362, 18.07102, 15.47621, 12.14002, 16.31026, 16.31026, 11.58399, 13.90079, 16.4956, 15.93957, 15.29087, 15.66155, 12.51071,
+              16.86629, 12.60338, 17.32965, 15.01285, 15.10552, 12.14002, 13.06674, 15.93957, 15.01285, 16.40293, 16.58827, 12.69605, 17.14431, 16.77362, 12.32537, 15.10552, 14.36415, 12.51071,
+              14.73484, 14.27148, 16.95896, 12.60338, 15.75423, 17.23698, 13.5301, 15.75423, 14.64216, 16.40293, 15.8469, 11.67666, 16.68095, 16.68095, 16.21759, 15.93957, 13.25208, 17.14431,
+              12.97407, 16.95896, 16.12491, 17.23698, 12.78873, 13.80812, 17.23698, 17.42232, 14.36415, 16.4956, 15.56888, 13.06674, 16.21759, 16.31026, 13.43743, 16.86629, 12.69605, 15.66155,
+              15.47621, 16.21759, 16.40293, 17.05163, 14.82751, 13.43743, 13.06674, 15.47621, 15.01285, 16.12491, 16.31026, 13.06674, 16.12491, 16.4956, 17.51499, 17.14431, 16.12491, 14.64216,
+              15.66155, 15.66155, 15.8469, 13.43743, 16.03224, 16.77362, 16.31026, 17.70034, 16.58827, 15.01285, 16.77362, 16.77362, 16.4956, 17.14431, 16.4956, 16.12491, 17.14431, 15.47621,
+              13.99346, 16.12491, 14.36415, 15.01285, 13.80812, 16.68095, 15.56888, 16.86629, 16.77362, 17.60767, 17.42232, 17.51499, 17.42232, 17.60767, 16.77362, 17.51499, 11.2133, 16.68095,
+              17.14431, 16.86629, 14.64216, 16.95896, 15.56888, 17.60767, 16.77362, 17.23698, 17.70034, 19.3685, 18.97918, 61.6922)
+gp3D &lt;- gene.plot(gl2, mat, gannot3D, plot=F, weights=weights2)
+</code></pre>
+
+<pre><code>## [1] &quot;Genes available:&quot;
+##  [1] &quot;Celsr1&quot;   &quot;Dkk3&quot;     &quot;Bhlhe22&quot;  &quot;E2f8&quot;     &quot;Eomes&quot;    &quot;Slit2&quot;   
+##  [7] &quot;Phf13&quot;    &quot;Cd9&quot;      &quot;Col18a1&quot;  &quot;Lamb1&quot;    &quot;Neurod2&quot;  &quot;Tef&quot;     
+## [13] &quot;Cbln2&quot;    &quot;Nfix&quot;     &quot;Dusp14&quot;   &quot;Hap1&quot;     &quot;Synpr&quot;    &quot;Smad3&quot;   
+## [19] &quot;Klf6&quot;     &quot;Hmga2&quot;    &quot;Pcdh18&quot;   &quot;Nrxn1&quot;    &quot;Arhgef25&quot; &quot;E2f6&quot;    
+## [25] &quot;Sox3&quot;     &quot;Maml1&quot;    &quot;Fgfr2&quot;    &quot;Itpr1&quot;    &quot;Col11a1&quot;  &quot;E2f7&quot;    
+## [31] &quot;Wnt8b&quot;    &quot;Rspo3&quot;    &quot;Ece2&quot;     &quot;Pvrl2&quot;    &quot;Trps1&quot;    &quot;Sstr2&quot;   
+## [37] &quot;Alcam&quot;    &quot;Gusb&quot;     &quot;Pms1&quot;     &quot;Prdm5&quot;    &quot;Adnp2&quot;    &quot;Brca1&quot;   
+## [43] &quot;Tmed3&quot;    &quot;Chrna3&quot;   &quot;Tfap2c&quot;   &quot;Slc17a7&quot;  &quot;Neurod1&quot;  &quot;Pcp4&quot;    
+## [49] &quot;Gpc3&quot;     &quot;Dach2&quot;    &quot;Emx1&quot;     &quot;Plxna4&quot;   &quot;Slc17a6&quot;  &quot;Lmcd1&quot;   
+## [55] &quot;Hey1&quot;     &quot;Neurod6&quot;  &quot;Cbln4&quot;    &quot;Nhlh1&quot;    &quot;Mterfd3&quot;  &quot;Jag1&quot;    
+## [61] &quot;Nfia&quot;     &quot;Neurog2&quot;  &quot;Otx1&quot;     &quot;Nr2e1&quot;    &quot;Gja1&quot;     &quot;Nfib&quot;    
+## [1] &quot;Genes not available:&quot;
+##   [1] &quot;Sp1&quot;           &quot;Adck2&quot;         &quot;Bms1&quot;          &quot;Eif2c3&quot;       
+##   [5] &quot;Rcan2&quot;         &quot;Tmem115&quot;       &quot;Zfp654&quot;        &quot;Smap1&quot;        
+##   [9] &quot;Map2k6&quot;        &quot;Cadm4&quot;         &quot;B4galt4&quot;       &quot;Etl4&quot;         
+##  [13] &quot;Qsox2&quot;         &quot;Hist1h1c&quot;      &quot;1810041L15Rik&quot; &quot;Thap7&quot;        
+##  [17] &quot;Fuca1&quot;         &quot;Stard4&quot;        &quot;Rap1gds1&quot;      &quot;Fam84b&quot;       
+##  [21] &quot;Pigh&quot;          &quot;Ogfrl1&quot;        &quot;Mdm1&quot;          &quot;Syde2&quot;        
+##  [25] &quot;Gm166&quot;         &quot;Ccdc171&quot;       &quot;BC023829&quot;      &quot;9230110C19Rik&quot;
+##  [29] &quot;Lin9&quot;          &quot;Clpp&quot;          &quot;Xrcc4&quot;         &quot;Vrk3&quot;         
+##  [33] &quot;Cdk5rap1&quot;      &quot;Lrr1&quot;          &quot;Spty2d1&quot;       &quot;Ext2&quot;         
+##  [37] &quot;Tex261&quot;        &quot;1810044D09Rik&quot; &quot;Gpr156&quot;        &quot;2410127L17Rik&quot;
+##  [41] &quot;Pdp2&quot;          &quot;Tenm4&quot;         &quot;D3Ertd751e&quot;    &quot;Prtg&quot;         
+##  [45] &quot;Mrps26&quot;        &quot;Rabac1&quot;        &quot;Chaf1b&quot;        &quot;Gm17762&quot;      
+##  [49] &quot;Trim3&quot;         &quot;Cpeb2&quot;         &quot;Rmi1&quot;          &quot;Klf16&quot;        
+##  [53] &quot;Echdc1&quot;        &quot;Hdac7&quot;         &quot;Gadd45a&quot;       &quot;Myo7a&quot;        
+##  [57] &quot;Safb2&quot;         &quot;Scml2&quot;         &quot;Pbk&quot;           &quot;Slc16a1&quot;      
+##  [61] &quot;Atp2b1&quot;        &quot;Polr3h&quot;        &quot;Mlst8&quot;         &quot;Cradd&quot;        
+##  [65] &quot;Avl9&quot;          &quot;Ndc80&quot;         &quot;Ift74&quot;         &quot;Oscp1&quot;        
+##  [69] &quot;Nufip1&quot;        &quot;Sft2d2&quot;        &quot;Mipep&quot;         &quot;Rrp15&quot;        
+##  [73] &quot;Rfxap&quot;         &quot;Melk&quot;          &quot;Wdr35&quot;         &quot;Fam53b&quot;       
+##  [77] &quot;Faim&quot;          &quot;Ankib1&quot;        &quot;Pim3&quot;          &quot;Tcn2&quot;         
+##  [81] &quot;Sptlc1&quot;        &quot;Lmf1&quot;          &quot;2700050L05Rik&quot; &quot;P4ha1&quot;        
+##  [85] &quot;Ugdh&quot;          &quot;2510003E04Rik&quot; &quot;Unc50&quot;         &quot;Trappc6a&quot;     
+##  [89] &quot;Urm1&quot;          &quot;Ccdc117&quot;       &quot;Zdhhc24&quot;       &quot;Osbpl5&quot;       
+##  [93] &quot;Spg20&quot;         &quot;Prrc1&quot;         &quot;Sh3pxd2a&quot;      &quot;AI414108&quot;     
+##  [97] &quot;Znrf3&quot;         &quot;Phlpp2&quot;        &quot;Mpp6&quot;          &quot;Dhx33&quot;        
+## [101] &quot;Spg21&quot;         &quot;Ankrd40&quot;       &quot;Smyd5&quot;         &quot;Fbln1&quot;        
+## [105] &quot;Sapcd2&quot;        &quot;Rnft1&quot;         &quot;Wee1&quot;          &quot;Vkorc1l1&quot;     
+## [109] &quot;Zfp574&quot;        &quot;Nap1l2&quot;        &quot;Ccdc112&quot;       &quot;Epb4.1l2&quot;     
+## [113] &quot;1810055G02Rik&quot; &quot;Kctd3&quot;         &quot;Ccdc40&quot;        &quot;Wdr3&quot;         
+## [117] &quot;Arhgap31&quot;      &quot;Zc3h7a&quot;        &quot;Cenph&quot;         &quot;Gpank1&quot;       
+## [121] &quot;Kdm2a&quot;         &quot;1190002N15Rik&quot; &quot;Ptar1&quot;         &quot;Lpar4&quot;        
+## [125] &quot;Uaca&quot;          &quot;Stk24&quot;         &quot;Tmem248&quot;       &quot;Lipt1&quot;        
+## [129] &quot;Rnf26&quot;         &quot;Asb1&quot;          &quot;Add3&quot;          &quot;Ankzf1&quot;       
+## [133] &quot;Fbxo25&quot;        &quot;Zfp955b&quot;       &quot;Fbxl6&quot;         &quot;Bcl2l12&quot;      
+## [137] &quot;Cystm1&quot;        &quot;Thop1&quot;         &quot;Trmt13&quot;        &quot;Tmem179b&quot;     
+## [141] &quot;Slu7&quot;          &quot;Nucb1&quot;         &quot;Scd1&quot;          &quot;Nptx1&quot;        
+## [145] &quot;Ppap2c&quot;        &quot;Lap3&quot;          &quot;Asb3&quot;          &quot;Ano1&quot;         
+## [149] &quot;Acad8&quot;         &quot;Pgap2&quot;         &quot;Fam179b&quot;       &quot;Tceb3&quot;        
+## [153] &quot;Tnik&quot;          &quot;Dap3&quot;          &quot;Slc25a24&quot;      &quot;Cyth3&quot;        
+## [157] &quot;Tspan12&quot;       &quot;1700102H20Rik&quot; &quot;Dgkd&quot;          &quot;Klhdc4&quot;       
+## [161] &quot;Incenp&quot;        &quot;Vcam1&quot;         &quot;Atl3&quot;          &quot;Rai2&quot;         
+## [165] &quot;Tm7sf2&quot;        &quot;Napepld&quot;       &quot;Fert2&quot;         &quot;Cldn12&quot;       
+## [169] &quot;Katnb1&quot;        &quot;Hyal2&quot;         &quot;Gys1&quot;          &quot;Mcu&quot;          
+## [173] &quot;Pacrgl&quot;        &quot;Aldoc&quot;         &quot;Lhpp&quot;          &quot;Pi4k2b&quot;       
+## [177] &quot;Rem2&quot;          &quot;Polr3a&quot;        &quot;Ptpn13&quot;        &quot;2310039H08Rik&quot;
+## [181] &quot;Dph2&quot;          &quot;Ddrgk1&quot;        &quot;Tmem101&quot;       &quot;Gas2&quot;         
+## [185] &quot;Cdc45&quot;         &quot;Tmem126b&quot;      &quot;Pofut2&quot;        &quot;Cep68&quot;        
+## [189] &quot;Npc1&quot;          &quot;Lpar1&quot;         &quot;Adamts20&quot;      &quot;Bcl10&quot;        
+## [193] &quot;Mir135a-2&quot;     &quot;Snap23&quot;        &quot;Sesn1&quot;         &quot;Pde3b&quot;        
+## [197] &quot;Slk&quot;           &quot;Dennd1b&quot;       &quot;Plk1s1&quot;        &quot;Trak1&quot;        
+## [201] &quot;Galnt7&quot;        &quot;Rpia&quot;          &quot;2010204K13Rik&quot; &quot;Mbd1&quot;         
+## [205] &quot;Tmem178&quot;       &quot;Gmds&quot;          &quot;2010107G23Rik&quot; &quot;Rab30&quot;        
+## [209] &quot;Zbed3&quot;         &quot;Coasy&quot;         &quot;Fntb&quot;          &quot;Ndn&quot;          
+## [213] &quot;Dnajb12&quot;       &quot;Map4k3&quot;        &quot;Caml&quot;          &quot;Tceal1&quot;       
+## [217] &quot;Cdpf1&quot;         &quot;C1galt1c1&quot;     &quot;Smap2&quot;         &quot;Noc4l&quot;        
+## [221] &quot;Nubpl&quot;         &quot;Fgfbp3&quot;        &quot;Pold1&quot;         &quot;Sil1&quot;         
+## [225] &quot;Zmym1&quot;         &quot;2310035C23Rik&quot; &quot;Cluh&quot;          &quot;Rexo2&quot;        
+## [229] &quot;Frrs1l&quot;        &quot;Herc3&quot;         &quot;Slc25a36&quot;      &quot;Fahd1&quot;        
+## [233] &quot;Fam196a&quot;       &quot;Atrip&quot;         &quot;Smpd2&quot;         &quot;Hdgfrp2&quot;      
+## [237] &quot;Tanc1&quot;         &quot;Pspc1&quot;         &quot;Dgcr6&quot;         &quot;Slc30a10&quot;     
+## [241] &quot;Flrt2&quot;         &quot;Gdap2&quot;         &quot;Zfp770&quot;        &quot;Tmem110&quot;      
+## [245] &quot;Prr15&quot;         &quot;Hsd17b7&quot;       &quot;Per3&quot;          &quot;Tiparp&quot;       
+## [249] &quot;Gcat&quot;          &quot;AW554918&quot;      &quot;Ogfr&quot;          &quot;Gne&quot;          
+## [253] &quot;Ap4m1&quot;         &quot;Mlf1&quot;          &quot;Ppp4r2&quot;        &quot;Tmed5&quot;        
+## [257] &quot;Mtg1&quot;          &quot;Fars2&quot;         &quot;Dbndd1&quot;        &quot;Tmem251&quot;      
+## [261] &quot;Cdk2ap2&quot;       &quot;Dennd1a&quot;       &quot;Ercc3&quot;         &quot;Fam169a&quot;      
+## [265] &quot;Vps52&quot;         &quot;Nynrin&quot;        &quot;1700020I14Rik&quot; &quot;Athl1&quot;        
+## [269] &quot;Asrgl1&quot;        &quot;2700099C18Rik&quot; &quot;Obfc1&quot;         &quot;Necab3&quot;       
+## [273] &quot;Nckap5&quot;        &quot;Ptgr1&quot;         &quot;Ptpmt1&quot;        &quot;Zscan22&quot;      
+## [277] &quot;Msto1&quot;         &quot;Sdc4&quot;          &quot;Rgcc&quot;          &quot;Vkorc1&quot;       
+## [281] &quot;Hist1h4i&quot;      &quot;Tmem14a&quot;       &quot;Wfdc2&quot;         &quot;Baiap2l1&quot;     
+## [285] &quot;Gemin6&quot;        &quot;D330022K07Rik&quot; &quot;C430049B03Rik&quot; &quot;Slc35b2&quot;      
+## [289] &quot;Ext1&quot;          &quot;Rnf11&quot;         &quot;Zbtb17&quot;        &quot;Dtd2&quot;         
+## [293] &quot;Sap30l&quot;        &quot;Akip1&quot;         &quot;Zfp449&quot;        &quot;Mpp5&quot;         
+## [297] &quot;Kbtbd11&quot;       &quot;Zmym3&quot;         &quot;2700097O09Rik&quot; &quot;Slc9a1&quot;       
+## [301] &quot;2810408I11Rik&quot; &quot;Nup43&quot;         &quot;Zfp276&quot;        &quot;Gm15545&quot;      
+## [305] &quot;Zfyve16&quot;       &quot;Rcn3&quot;          &quot;Ccrn4l&quot;        &quot;Ift172&quot;       
+## [309] &quot;Pgs1&quot;          &quot;Rwdd3&quot;         &quot;Mettl23&quot;       &quot;Ttc8&quot;         
+## [313] &quot;Ndufaf1&quot;       &quot;Zfp719&quot;        &quot;Bre&quot;           &quot;Dpm1&quot;         
+## [317] &quot;Gm11627&quot;       &quot;Exoc6b&quot;        &quot;Eme1&quot;          &quot;Ccdc138&quot;      
+## [321] &quot;Hunk&quot;          &quot;Wdr60&quot;         &quot;Fam173b&quot;       &quot;Cntn5&quot;        
+## [325] &quot;Grtp1&quot;         &quot;Nedd9&quot;         &quot;Gtf2h4&quot;        &quot;Fut9&quot;         
+## [329] &quot;Osbpl11&quot;       &quot;0610007N19Rik&quot; &quot;Fndc3c1&quot;       &quot;Prosc&quot;        
+## [333] &quot;Ngly1&quot;         &quot;Nme3&quot;          &quot;Cdk19&quot;         &quot;Coq4&quot;         
+## [337] &quot;Smim8&quot;         &quot;Elmod3&quot;        &quot;Cad&quot;           &quot;2810002D19Rik&quot;
+## [341] &quot;Sc5d&quot;          &quot;BC030867&quot;      &quot;Pafah2&quot;        &quot;Hadhb&quot;        
+## [345] &quot;Usp25&quot;         &quot;Itm2a&quot;         &quot;Plekhf2&quot;       &quot;Pef1&quot;         
+## [349] &quot;Pcsk6&quot;         &quot;Sat1&quot;          &quot;Prokr1&quot;        &quot;Zkscan17&quot;     
+## [353] &quot;Pold3&quot;         &quot;Nkrf&quot;          &quot;Mmd2&quot;          &quot;Alad&quot;         
+## [357] &quot;Enpp5&quot;         &quot;Man1b1&quot;        &quot;Traf3ip1&quot;      &quot;Fut10&quot;        
+## [361] &quot;Ptplb&quot;         &quot;Dnajb2&quot;        &quot;BC022687&quot;      &quot;Ift122&quot;       
+## [365] &quot;Jph1&quot;          &quot;1110012L19Rik&quot; &quot;Cdk5rap2&quot;      &quot;Dym&quot;          
+## [369] &quot;Abhd6&quot;         &quot;A330048O09Rik&quot; &quot;Nop14&quot;         &quot;Gm9958&quot;       
+## [373] &quot;Zufsp&quot;         &quot;Qtrt1&quot;         &quot;Lman1&quot;         &quot;Ppp1r14a&quot;     
+## [377] &quot;Stx8&quot;          &quot;Adck5&quot;         &quot;Tmem216&quot;       &quot;Pdha1&quot;        
+## [381] &quot;Appl2&quot;         &quot;Coil&quot;          &quot;Hs3st1&quot;        &quot;Slc35a2&quot;      
+## [385] &quot;Zfp36l2&quot;       &quot;Atxn1l&quot;        &quot;Blvra&quot;         &quot;Cables2&quot;      
+## [389] &quot;Ttpal&quot;         &quot;2210016L21Rik&quot; &quot;Lrrc57&quot;        &quot;Aspscr1&quot;      
+## [393] &quot;Spice1&quot;        &quot;Bora&quot;          &quot;Ddx28&quot;         &quot;Gemin2&quot;       
+## [397] &quot;Gba&quot;           &quot;Ralb&quot;          &quot;Cdt1&quot;          &quot;Prelid2&quot;      
+## [401] &quot;5330426P16Rik&quot; &quot;A730017C20Rik&quot; &quot;Cntrob&quot;        &quot;Bivm&quot;         
+## [405] &quot;Rtn2&quot;          &quot;Sh3gl1&quot;        &quot;Phldb2&quot;        &quot;Galnt14&quot;      
+## [409] &quot;Pgm1&quot;          &quot;Esco2&quot;         &quot;Msl3&quot;          &quot;Zfp763&quot;       
+## [413] &quot;Mecr&quot;          &quot;Gpr89&quot;         &quot;Lsm10&quot;         &quot;Coq9&quot;         
+## [417] &quot;Akap10&quot;        &quot;Shmt2&quot;         &quot;Ubox5&quot;         &quot;Lrrn1&quot;        
+## [421] &quot;Cep57l1&quot;       &quot;Adamts10&quot;      &quot;Prim2&quot;         &quot;Tnfaip8&quot;      
+## [425] &quot;Gpr19&quot;         &quot;Masp1&quot;         &quot;Enoph1&quot;        &quot;Mgme1&quot;        
+## [429] &quot;Suclg2&quot;        &quot;Pinx1&quot;         &quot;Ube2t&quot;         &quot;Arl6&quot;         
+## [433] &quot;Cers2&quot;         &quot;2810055G20Rik&quot; &quot;Tmem132c&quot;      &quot;Atic&quot;         
+## [437] &quot;Actr1b&quot;        &quot;Asah1&quot;         &quot;Rprd1a&quot;        &quot;0610031J06Rik&quot;
+## [441] &quot;Litaf&quot;         &quot;Plp2&quot;          &quot;Ankrd13c&quot;      &quot;Uchl5&quot;        
+## [445] &quot;Taf12&quot;         &quot;Serpini1&quot;
+</code></pre>
+
+<pre><code class="r">gpsect3D &lt;- structure.plot(cids, gp3D, gannot3D, plot=F)
+plot.projection.xray(vol3D, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.projection(gpsect3D, t=1, add=T)
+plot.slice.xray(vol3D, s2, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.slice(gpsect3D, s, t=1, add=T)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-4-1.png" alt="plot of chunk unnamed-chunk-4"> <img src="figure/unnamed-chunk-4-2.png" alt="plot of chunk unnamed-chunk-4"> <img src="figure/unnamed-chunk-4-3.png" alt="plot of chunk unnamed-chunk-4"> <img src="figure/unnamed-chunk-4-4.png" alt="plot of chunk unnamed-chunk-4"> </p>
+
+<p>Compare relative placement.</p>
+
+<pre><code class="r">gp3D &lt;- gene.plot.weighted.comp(gl1, weights1, gl2, weights2, mat, gannot3D, plot=F)
+</code></pre>
+
+<pre><code>##  [1] &quot;Dlx2&quot;     &quot;Sp9&quot;      &quot;Pbx3&quot;     &quot;Dlx5&quot;     &quot;Dlx1&quot;     &quot;Zfhx3&quot;   
+##  [7] &quot;Pou3f4&quot;   &quot;Meis1&quot;    &quot;Slc6a1&quot;   &quot;Sp8&quot;      &quot;Pbx1&quot;     &quot;Dcx&quot;     
+## [13] &quot;Gad2&quot;     &quot;Celsr1&quot;   &quot;Dkk3&quot;     &quot;Bhlhe22&quot;  &quot;E2f8&quot;     &quot;Eomes&quot;   
+## [19] &quot;Slit2&quot;    &quot;Phf13&quot;    &quot;Cd9&quot;      &quot;Col18a1&quot;  &quot;Lamb1&quot;    &quot;Neurod2&quot; 
+## [25] &quot;Tef&quot;      &quot;Cbln2&quot;    &quot;Nfix&quot;     &quot;Dusp14&quot;   &quot;Hap1&quot;     &quot;Synpr&quot;   
+## [31] &quot;Smad3&quot;    &quot;Klf6&quot;     &quot;Hmga2&quot;    &quot;Pcdh18&quot;   &quot;Nrxn1&quot;    &quot;Arhgef25&quot;
+## [37] &quot;E2f6&quot;     &quot;Sox3&quot;     &quot;Maml1&quot;    &quot;Fgfr2&quot;    &quot;Itpr1&quot;    &quot;Col11a1&quot; 
+## [43] &quot;E2f7&quot;     &quot;Wnt8b&quot;    &quot;Rspo3&quot;    &quot;Ece2&quot;     &quot;Pvrl2&quot;    &quot;Trps1&quot;   
+## [49] &quot;Sstr2&quot;    &quot;Alcam&quot;    &quot;Gusb&quot;     &quot;Pms1&quot;     &quot;Prdm5&quot;    &quot;Adnp2&quot;   
+## [55] &quot;Brca1&quot;    &quot;Tmed3&quot;    &quot;Chrna3&quot;   &quot;Tfap2c&quot;   &quot;Slc17a7&quot;  &quot;Neurod1&quot; 
+## [61] &quot;Pcp4&quot;     &quot;Gpc3&quot;     &quot;Dach2&quot;    &quot;Emx1&quot;     &quot;Plxna4&quot;   &quot;Slc17a6&quot; 
+## [67] &quot;Lmcd1&quot;    &quot;Hey1&quot;     &quot;Neurod6&quot;  &quot;Cbln4&quot;    &quot;Nhlh1&quot;    &quot;Mterfd3&quot; 
+## [73] &quot;Jag1&quot;     &quot;Nfia&quot;     &quot;Neurog2&quot;  &quot;Otx1&quot;     &quot;Nr2e1&quot;    &quot;Gja1&quot;    
+## [79] &quot;Nfib&quot;    
+##  [1]  46.269150  33.333690  36.567550  43.529290  39.490660   4.262908
+##  [7]   8.896505   8.525134   4.538585   3.559675   1.706482   2.031702
+## [13]   3.470824 -13.618640 -10.710390 -11.571220 -10.222250 -13.846990
+## [19] -14.866400 -10.873710 -13.592140 -10.873710 -10.536760 -14.745630
+## [25] -10.729080 -13.930490 -13.497870 -15.512460 -10.121080 -12.389600
+## [31] -12.564100 -12.581410 -18.819190 -14.993110 -13.670190 -14.581960
+## [37] -15.541410 -13.765250 -11.367430 -15.630220 -12.992810 -16.152790
+## [43] -15.471790 -13.603560 -16.766470 -15.890320 -15.800040 -13.813750
+## [49] -15.438890 -13.633170 -12.820600 -15.986360 -11.733540 -16.435410
+## [55] -15.805290 -17.051630 -15.105520 -17.051630 -10.657270 -18.071020
+## [61] -15.476210 -15.661550 -13.066740 -16.680950 -16.124910 -17.236980
+## [67] -15.476210 -15.012850 -17.514990 -13.437430 -16.773620 -17.144310
+## [73] -15.012850 -11.213300 -17.144310 -14.642160 -15.568880 -18.979180
+## [79] -61.692200
+</code></pre>
+
+<pre><code class="r">gpsect3D &lt;- structure.plot(cids, gp3D, gannot3D, plot=F)
+plot.slice.xray(vol3D, s2, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.slice.comp(gpsect3D, s, add=T)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-5-1.png" alt="plot of chunk unnamed-chunk-5"> </p>
+
+<p>Gene expression signatures for top subpopulation split in neuroprogenitor cells identified by <code>pagoda</code>.</p>
+
+<pre><code class="r">gl1 &lt;- c(&quot;Kif23&quot;, &quot;Rad51&quot;, &quot;Pole&quot;, &quot;Mcm10&quot;, &quot;Pabpc4l&quot;, &quot;Pola1&quot;, &quot;Ifi30&quot;, &quot;Tmem97&quot;, &quot;Cdc6&quot;, &quot;Cdca5&quot;, &quot;Gins2&quot;, &quot;Prdx1&quot;, &quot;Ticrr&quot;, &quot;Car14&quot;, &quot;Mis18bp1&quot;, &quot;Kntc1&quot;, &quot;Cdc45&quot;, &quot;Wee1&quot;, &quot;Poc1a&quot;, &quot;Mgme1&quot;, &quot;Ncaph&quot;, &quot;Exo1&quot;, &quot;Isyna1&quot;, &quot;Rad54b&quot;, &quot;Shmt1&quot;, &quot;Sgol1&quot;, &quot;Shcbp1&quot;, &quot;Vcam1&quot;, &quot;Bora&quot;, &quot;Hmgb2&quot;, &quot;Cenpn&quot;, &quot;Esco2&quot;, &quot;Espl1&quot;, &quot;Pole2&quot;, &quot;BC030867&quot;, &quot;Zfp367&quot;, &quot;Sox3&quot;, &quot;Pus3&quot;, &quot;Ndc80&quot;, &quot;Pold1&quot;, &quot;2810408I11Rik&quot;, &quot;Lpar1&quot;, &quot;Lhfpl2&quot;, &quot;Ccnf&quot;, &quot;Gpx7&quot;, &quot;BC055324&quot;, &quot;Megf10&quot;, &quot;Fgfbp3&quot;, &quot;Cdt1&quot;, &quot;2700099C18Rik&quot;, &quot;Arhgef39&quot;, &quot;Suv39h2&quot;, &quot;Trps1&quot;, &quot;Clspn&quot;, &quot;Siva1&quot;, &quot;Gulp1&quot;, &quot;Setdb2&quot;, &quot;Rpa2&quot;, &quot;Wwtr1&quot;, &quot;Ak4&quot;, &quot;Ing5&quot;, &quot;Crip1&quot;, &quot;Orc1&quot;, &quot;Acrbp&quot;, &quot;Arhgap31&quot;, &quot;Rad50&quot;, &quot;Rragb&quot;, &quot;Med26&quot;, &quot;Samhd1&quot;, &quot;Lpcat1&quot;, &quot;Dhx32&quot;, &quot;Mms22l&quot;, &quot;B330016D10Rik&quot;, &quot;Clu&quot;, &quot;Gm11627&quot;, &quot;Dctd&quot;, &quot;Dleu2&quot;, &quot;Atad5&quot;, &quot;Fgfr2&quot;, &quot;Pxdn&quot;, &quot;H2afz&quot;, &quot;Ran&quot;, &quot;Tyms&quot;, &quot;Kbtbd11&quot;, &quot;Hist1h1b&quot;, &quot;Ercc6l&quot;, &quot;Syde2&quot;, &quot;D3Ertd751e&quot;, &quot;2810417H13Rik&quot;, &quot;Scml2&quot;, &quot;Kif2c&quot;, &quot;Kif22&quot;, &quot;Depdc1a&quot;, &quot;Tmem98&quot;, &quot;Tyro3&quot;, &quot;Ccdc77&quot;, &quot;Adat1&quot;, &quot;Tk1&quot;, &quot;Sfxn5&quot;, &quot;BC052040&quot;, &quot;Mybl2&quot;, &quot;Sox2&quot;, &quot;Gm3893&quot;, &quot;Ptpru&quot;, &quot;Fn1&quot;, &quot;Npm1&quot;, &quot;Mad2l1&quot;, &quot;Fbxo30&quot;, &quot;Etl4&quot;, &quot;Rpsa&quot;, &quot;Aif1l&quot;, &quot;Hmgn2&quot;, &quot;Lrrc1&quot;, &quot;Cad&quot;, &quot;Hes1&quot;, &quot;Hmgb1&quot;, &quot;Msrb2&quot;, &quot;Ogfod3&quot;, &quot;Cluh&quot;, &quot;Hells&quot;, &quot;Diap3&quot;, &quot;Gapdh&quot;, &quot;Cenph&quot;, &quot;Kif14&quot;, &quot;Thoc3&quot;, &quot;Dusp16&quot;, &quot;Rev1&quot;, &quot;9430015G10Rik&quot;, &quot;Traf3&quot;, &quot;Exosc8&quot;, &quot;Rad51ap1&quot;, &quot;Cdk2&quot;, &quot;Ppic&quot;, &quot;Neil3&quot;, &quot;Tom1l1&quot;, &quot;Prr14&quot;, &quot;Xpo4&quot;, &quot;Tgfb2&quot;, &quot;Arhgap17&quot;, &quot;Igflr1&quot;, &quot;Gpx8&quot;, &quot;Paics&quot;, &quot;Hirip3&quot;, &quot;Gen1&quot;, &quot;Polq&quot;, &quot;Fbxo5&quot;, &quot;Uck1&quot;, &quot;Tcf7l2&quot;, &quot;Mipep&quot;, &quot;Dnaaf2&quot;, &quot;0610007N19Rik&quot;, &quot;Actn1&quot;, &quot;Atp5sl&quot;, &quot;Pla2g12a&quot;, &quot;Cdca7&quot;, &quot;Scd1&quot;, &quot;Tuba1b&quot;, &quot;2610015P09Rik&quot;, &quot;Mir3112&quot;, &quot;Gtse1&quot;, &quot;Nedd9&quot;, &quot;Cry1&quot;, &quot;Nasp&quot;, &quot;Exosc7&quot;, &quot;Iqcc&quot;, &quot;Tmem110&quot;, &quot;Acot1&quot;, &quot;Grb10&quot;, &quot;S1pr1&quot;, &quot;Ckap2&quot;, &quot;Coq10a&quot;, &quot;Idi1&quot;, &quot;Cdca7l&quot;, &quot;Incenp&quot;, &quot;Mettl16&quot;, &quot;Mdk&quot;, &quot;Haus5&quot;, &quot;Cks1b&quot;, &quot;Tmed5&quot;, &quot;Pdpn&quot;, &quot;Gpc3&quot;, &quot;Gar1&quot;, &quot;Igsf11&quot;, &quot;Msh6&quot;, &quot;Mif&quot;, &quot;Zfp36l1&quot;, &quot;Igfbp5&quot;, &quot;Mns1&quot;, &quot;Dgkd&quot;, &quot;Sdc1&quot;, &quot;Zfp748&quot;, &quot;Kazn&quot;, &quot;Prr15&quot;, &quot;Top2a&quot;, &quot;Etaa1&quot;, &quot;Sapcd2&quot;, &quot;Notch2&quot;, &quot;Agpat3&quot;, &quot;Gatad2a&quot;, &quot;Nde1&quot;, &quot;Dnajc3&quot;, &quot;Gmds&quot;, &quot;Psat1&quot;, &quot;Fras1&quot;, &quot;Cenpm&quot;, &quot;Casc5&quot;, &quot;Adamts6&quot;, &quot;Zadh2&quot;, &quot;Mt1&quot;, &quot;Zfp579&quot;, &quot;Mki67&quot;, &quot;Set&quot;, &quot;Sfrp2&quot;, &quot;4930422G04Rik&quot;, &quot;Zfyve21&quot;, &quot;Ddx51&quot;, &quot;Gas1&quot;, &quot;Haus3&quot;, &quot;Ect2&quot;, &quot;Fam84b&quot;, &quot;Cenpp&quot;, &quot;Rlbp1&quot;, &quot;Nmral1&quot;, &quot;Hist1h4i&quot;, &quot;Bmpr1b&quot;, &quot;Chtf18&quot;, &quot;Metrn&quot;, &quot;Nrde2&quot;, &quot;Lrr1&quot;, &quot;Mir17hg&quot;, &quot;Hspd1&quot;, &quot;Sav1&quot;, &quot;Fzd10&quot;, &quot;Fndc3c1&quot;, &quot;Slbp&quot;, &quot;4931417G12Rik&quot;, &quot;Hn1l&quot;, &quot;Six5&quot;, &quot;Enoph1&quot;, &quot;Ccnd2&quot;, &quot;Kif4&quot;, &quot;Gorab&quot;, &quot;1190002F15Rik&quot;, &quot;Gins1&quot;, &quot;Wnt5b&quot;, &quot;Snap23&quot;, &quot;Cln3&quot;, &quot;Gm8096&quot;, &quot;Cpped1&quot;, &quot;Jmy&quot;, &quot;Fam229b&quot;, &quot;Ajuba&quot;, &quot;Stard4&quot;)
+weights1 &lt;- c(25.70137, 29.59888, 29.76567, 24.68016, 20.78329, 30.52546, 12.57898, 23.69041, 24.49737, 21.06707, 32.37425, 5.917703, 19.79369, 21.01805, 25.45902, 22.69036, 23.80137, 21.25906, 16.99061, 18.17822, 17.96696, 17.36431, 17.05992, 14.48438, 21.92231, 19.96471, 17.36249, 19.89858, 15.78619, 6.346554, 17.87554, 20.61649, 5.917697, 19.22824, 16.48714, 22.7253, 13.72571, 13.32367, 19.62173, 16.07113, 15.13676, 21.24849, 14.2775, 16.07539, 14.12963, 11.73834, 15.93613, 10.93345, 11.10596, 9.628688, 9.79836, 16.14695, 14.06795, 23.8073, 7.214335, 10.8215, 11.636, 20.89295, 8.902458, 7.897001, 17.6958, 6.402814, 9.927401, 9.585663, 8.215373, 15.92776, 8.194774, 6.135632, 10.93828, 7.952126, 16.78108, 16.1418, 2.070826, 6.528858, 9.800817, 11.02213, 9.256968, 16.95434, 12.59132, 8.249959, 2.740084, 2.878239, 4.189773, 14.78767, 18.76207, 1.33938, 5.344057, 6.081742, 6.228143, 3.545454, 9.881127, 20.20164, 3.719686, 12.51794, 11.40345, 12.55717, 7.988526, 16.67645, 8.497081, 5.096289, 2.680227, 16.3119, 3.742364, 5.846637, 17.05004, 1.718221, 10.56812, 9.421022, 14.12226, 1.699372, 17.3678, 2.077661, 0.6450837, 12.12757, 12.55257, 1.53705, 10.15608, 2.53861, 8.247943, 12.41625, 1.642412, 1.629888, 5.639646, 3.234741, 12.14668, 4.45925, 9.412865, 5.930603, 7.660363, 3.666648, 2.547089, 11.78479, 12.261, 2.025131, 4.379496, 11.31754, 1.280813, 2.444286, 5.080282, 1.151702, 4.837149, 1.957394, 10.35392, 1.138974, 1.366205, 12.28883, 1.020337, 13.09234, 6.433306, 6.510424, 9.765636, 10.70904, 1.219111, 7.532179, 5.637852, 5.4065, 1.321662, 8.798219, 1.094809, 1.092081, 0.9728729, 0.9702798, 2.048368, 2.667087, 5.972456, 3.175221, 0.2115612, 2.327173, 0.2101568, 5.848486, 0.8351951, 2.916965, 3.436796, 9.419663, 8.348403, 1.2368, 8.347702, 1.748644, 8.086359, 8.802871, 8.393264, 6.835873, 3.0586, 10.96285, 1.116587, 4.741809, 7.759272, 7.842224, 7.012087, 6.010361, 4.607943, 5.191336, 3.076776, 3.572298, 1.765293, 0.7824073, 7.956223, 7.234441, 2.122103, 5.009876, 6.250351, 0.7641022, 2.843459, 0.7556067, 6.598702, 8.607848, 4.863156, 0.09266894, 6.300077, 0.8268156, 3.471054, 0.8220918, 4.737982, 8.173211, 4.712872, 0.09035995, 5.151065, 4.966644, 5.934447, 3.802551, 7.073224, 0.4405537, 1.760735, 6.330614, 6.589453, 7.280396, 0.8713346, 5.207967, 0.4322329, 4.748665, 1.033637, 0.8578934, 0.08547415, 7.000531, 1.535777, 0.0850716, 4.053823, 0.4203083, 6.716998, 0.9235872, 6.528929, 5.439931, 3.548127, 5.280641, 0.3300401, 2.31028, 4.680702, 0.08206534, 3.604325, 6.05617, 4.008056, 3.190085, 0.6513329)
+gp3D &lt;- gene.plot(gl1, mat, gannot3D, plot=F, weights=weights1)
+</code></pre>
+
+<pre><code>## [1] &quot;Genes available:&quot;
+##  [1] &quot;Sox3&quot;    &quot;Trps1&quot;   &quot;Wwtr1&quot;   &quot;Clu&quot;     &quot;Fgfr2&quot;   &quot;Tyro3&quot;   &quot;Mybl2&quot;  
+##  [8] &quot;Sox2&quot;    &quot;Ptpru&quot;   &quot;Fn1&quot;     &quot;Hmgn2&quot;   &quot;Hes1&quot;    &quot;Hmgb1&quot;   &quot;Tgfb2&quot;  
+## [15] &quot;Tcf7l2&quot;  &quot;S1pr1&quot;   &quot;Cdca7l&quot;  &quot;Pdpn&quot;    &quot;Gpc3&quot;    &quot;Zfp36l1&quot; &quot;Igfbp5&quot; 
+## [22] &quot;Notch2&quot;  &quot;Gatad2a&quot; &quot;Nde1&quot;    &quot;Sfrp2&quot;   &quot;Gas1&quot;    &quot;Nmral1&quot;  &quot;Bmpr1b&quot; 
+## [29] &quot;Hspd1&quot;   &quot;Fzd10&quot;   &quot;Six5&quot;    &quot;Wnt5b&quot;  
+## [1] &quot;Genes not available:&quot;
+##   [1] &quot;Kif23&quot;         &quot;Rad51&quot;         &quot;Pole&quot;          &quot;Mcm10&quot;        
+##   [5] &quot;Pabpc4l&quot;       &quot;Pola1&quot;         &quot;Ifi30&quot;         &quot;Tmem97&quot;       
+##   [9] &quot;Cdc6&quot;          &quot;Cdca5&quot;         &quot;Gins2&quot;         &quot;Prdx1&quot;        
+##  [13] &quot;Ticrr&quot;         &quot;Car14&quot;         &quot;Mis18bp1&quot;      &quot;Kntc1&quot;        
+##  [17] &quot;Cdc45&quot;         &quot;Wee1&quot;          &quot;Poc1a&quot;         &quot;Mgme1&quot;        
+##  [21] &quot;Ncaph&quot;         &quot;Exo1&quot;          &quot;Isyna1&quot;        &quot;Rad54b&quot;       
+##  [25] &quot;Shmt1&quot;         &quot;Sgol1&quot;         &quot;Shcbp1&quot;        &quot;Vcam1&quot;        
+##  [29] &quot;Bora&quot;          &quot;Hmgb2&quot;         &quot;Cenpn&quot;         &quot;Esco2&quot;        
+##  [33] &quot;Espl1&quot;         &quot;Pole2&quot;         &quot;BC030867&quot;      &quot;Zfp367&quot;       
+##  [37] &quot;Pus3&quot;          &quot;Ndc80&quot;         &quot;Pold1&quot;         &quot;2810408I11Rik&quot;
+##  [41] &quot;Lpar1&quot;         &quot;Lhfpl2&quot;        &quot;Ccnf&quot;          &quot;Gpx7&quot;         
+##  [45] &quot;BC055324&quot;      &quot;Megf10&quot;        &quot;Fgfbp3&quot;        &quot;Cdt1&quot;         
+##  [49] &quot;2700099C18Rik&quot; &quot;Arhgef39&quot;      &quot;Suv39h2&quot;       &quot;Clspn&quot;        
+##  [53] &quot;Siva1&quot;         &quot;Gulp1&quot;         &quot;Setdb2&quot;        &quot;Rpa2&quot;         
+##  [57] &quot;Ak4&quot;           &quot;Ing5&quot;          &quot;Crip1&quot;         &quot;Orc1&quot;         
+##  [61] &quot;Acrbp&quot;         &quot;Arhgap31&quot;      &quot;Rad50&quot;         &quot;Rragb&quot;        
+##  [65] &quot;Med26&quot;         &quot;Samhd1&quot;        &quot;Lpcat1&quot;        &quot;Dhx32&quot;        
+##  [69] &quot;Mms22l&quot;        &quot;B330016D10Rik&quot; &quot;Gm11627&quot;       &quot;Dctd&quot;         
+##  [73] &quot;Dleu2&quot;         &quot;Atad5&quot;         &quot;Pxdn&quot;          &quot;H2afz&quot;        
+##  [77] &quot;Ran&quot;           &quot;Tyms&quot;          &quot;Kbtbd11&quot;       &quot;Hist1h1b&quot;     
+##  [81] &quot;Ercc6l&quot;        &quot;Syde2&quot;         &quot;D3Ertd751e&quot;    &quot;2810417H13Rik&quot;
+##  [85] &quot;Scml2&quot;         &quot;Kif2c&quot;         &quot;Kif22&quot;         &quot;Depdc1a&quot;      
+##  [89] &quot;Tmem98&quot;        &quot;Ccdc77&quot;        &quot;Adat1&quot;         &quot;Tk1&quot;          
+##  [93] &quot;Sfxn5&quot;         &quot;BC052040&quot;      &quot;Gm3893&quot;        &quot;Npm1&quot;         
+##  [97] &quot;Mad2l1&quot;        &quot;Fbxo30&quot;        &quot;Etl4&quot;          &quot;Rpsa&quot;         
+## [101] &quot;Aif1l&quot;         &quot;Lrrc1&quot;         &quot;Cad&quot;           &quot;Msrb2&quot;        
+## [105] &quot;Ogfod3&quot;        &quot;Cluh&quot;          &quot;Hells&quot;         &quot;Diap3&quot;        
+## [109] &quot;Gapdh&quot;         &quot;Cenph&quot;         &quot;Kif14&quot;         &quot;Thoc3&quot;        
+## [113] &quot;Dusp16&quot;        &quot;Rev1&quot;          &quot;9430015G10Rik&quot; &quot;Traf3&quot;        
+## [117] &quot;Exosc8&quot;        &quot;Rad51ap1&quot;      &quot;Cdk2&quot;          &quot;Ppic&quot;         
+## [121] &quot;Neil3&quot;         &quot;Tom1l1&quot;        &quot;Prr14&quot;         &quot;Xpo4&quot;         
+## [125] &quot;Arhgap17&quot;      &quot;Igflr1&quot;        &quot;Gpx8&quot;          &quot;Paics&quot;        
+## [129] &quot;Hirip3&quot;        &quot;Gen1&quot;          &quot;Polq&quot;          &quot;Fbxo5&quot;        
+## [133] &quot;Uck1&quot;          &quot;Mipep&quot;         &quot;Dnaaf2&quot;        &quot;0610007N19Rik&quot;
+## [137] &quot;Actn1&quot;         &quot;Atp5sl&quot;        &quot;Pla2g12a&quot;      &quot;Cdca7&quot;        
+## [141] &quot;Scd1&quot;          &quot;Tuba1b&quot;        &quot;2610015P09Rik&quot; &quot;Mir3112&quot;      
+## [145] &quot;Gtse1&quot;         &quot;Nedd9&quot;         &quot;Cry1&quot;          &quot;Nasp&quot;         
+## [149] &quot;Exosc7&quot;        &quot;Iqcc&quot;          &quot;Tmem110&quot;       &quot;Acot1&quot;        
+## [153] &quot;Grb10&quot;         &quot;Ckap2&quot;         &quot;Coq10a&quot;        &quot;Idi1&quot;         
+## [157] &quot;Incenp&quot;        &quot;Mettl16&quot;       &quot;Mdk&quot;           &quot;Haus5&quot;        
+## [161] &quot;Cks1b&quot;         &quot;Tmed5&quot;         &quot;Gar1&quot;          &quot;Igsf11&quot;       
+## [165] &quot;Msh6&quot;          &quot;Mif&quot;           &quot;Mns1&quot;          &quot;Dgkd&quot;         
+## [169] &quot;Sdc1&quot;          &quot;Zfp748&quot;        &quot;Kazn&quot;          &quot;Prr15&quot;        
+## [173] &quot;Top2a&quot;         &quot;Etaa1&quot;         &quot;Sapcd2&quot;        &quot;Agpat3&quot;       
+## [177] &quot;Dnajc3&quot;        &quot;Gmds&quot;          &quot;Psat1&quot;         &quot;Fras1&quot;        
+## [181] &quot;Cenpm&quot;         &quot;Casc5&quot;         &quot;Adamts6&quot;       &quot;Zadh2&quot;        
+## [185] &quot;Mt1&quot;           &quot;Zfp579&quot;        &quot;Mki67&quot;         &quot;Set&quot;          
+## [189] &quot;4930422G04Rik&quot; &quot;Zfyve21&quot;       &quot;Ddx51&quot;         &quot;Haus3&quot;        
+## [193] &quot;Ect2&quot;          &quot;Fam84b&quot;        &quot;Cenpp&quot;         &quot;Rlbp1&quot;        
+## [197] &quot;Hist1h4i&quot;      &quot;Chtf18&quot;        &quot;Metrn&quot;         &quot;Nrde2&quot;        
+## [201] &quot;Lrr1&quot;          &quot;Mir17hg&quot;       &quot;Sav1&quot;          &quot;Fndc3c1&quot;      
+## [205] &quot;Slbp&quot;          &quot;4931417G12Rik&quot; &quot;Hn1l&quot;          &quot;Enoph1&quot;       
+## [209] &quot;Ccnd2&quot;         &quot;Kif4&quot;          &quot;Gorab&quot;         &quot;1190002F15Rik&quot;
+## [213] &quot;Gins1&quot;         &quot;Snap23&quot;        &quot;Cln3&quot;          &quot;Gm8096&quot;       
+## [217] &quot;Cpped1&quot;        &quot;Jmy&quot;           &quot;Fam229b&quot;       &quot;Ajuba&quot;        
+## [221] &quot;Stard4&quot;
+</code></pre>
+
+<pre><code class="r">gpsect3D &lt;- structure.plot(cids, gp3D, gannot3D, plot=F)
+plot.projection.xray(vol3D, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.projection(gpsect3D, t=1, add=T)
+plot.slice.xray(vol3D, s2, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.slice(gpsect3D, s, t=1, add=T)
+# Top split group 2
+gl2 &lt;- c(&quot;Ftl1&quot;, &quot;Stmn3&quot;, &quot;Rnf185&quot;, &quot;Serinc5&quot;, &quot;Plk3&quot;, &quot;Nfasc&quot;, &quot;Apc&quot;, &quot;Khdrbs2&quot;, &quot;1810041L15Rik&quot;, &quot;Celsr3&quot;, &quot;Klhdc5&quot;, &quot;Plch2&quot;, &quot;Tram1l1&quot;, &quot;Plcl1&quot;, &quot;Calcoco1&quot;, &quot;Gm2694&quot;, &quot;2510009E07Rik&quot;, &quot;Srgap1&quot;, &quot;Klf7&quot;, &quot;Nhlh2&quot;, &quot;Nsg2&quot;, &quot;Tmtc4&quot;, &quot;Nkain3&quot;, &quot;Actr2&quot;, &quot;Wdr83&quot;, &quot;Ina&quot;, &quot;Celf3&quot;, &quot;Pak7&quot;, &quot;Slc4a8&quot;, &quot;Gpr19&quot;, &quot;Fam5b&quot;, &quot;Gpr137&quot;, &quot;Atp6v1g1&quot;, &quot;Shisa7&quot;, &quot;Neurod1&quot;, &quot;Slc35a1&quot;, &quot;Nme3&quot;, &quot;Fkbpl&quot;, &quot;Apc2&quot;, &quot;Frmd4b&quot;, &quot;Clvs1&quot;, &quot;Evl&quot;, &quot;Dcc&quot;, &quot;Kif3c&quot;, &quot;Ank&quot;, &quot;Mbnl2&quot;, &quot;Tubb4a&quot;, &quot;Brwd3&quot;, &quot;Cacna2d1&quot;, &quot;Sgip1&quot;, &quot;Itm2b&quot;, &quot;Ccser1&quot;, &quot;Ndfip2&quot;, &quot;Klhl29&quot;, &quot;Yod1&quot;, &quot;Vcan&quot;, &quot;Ppm1a&quot;, &quot;Hn1&quot;, &quot;Atl1&quot;, &quot;Fam84a&quot;, &quot;Atp6v1f&quot;, &quot;Atg16l1&quot;, &quot;Rbfox1&quot;, &quot;Pcnxl4&quot;, &quot;Jakmip2&quot;, &quot;Rab3d&quot;, &quot;Stxbp1&quot;, &quot;Tspyl4&quot;, &quot;St8sia3&quot;, &quot;Mon2&quot;, &quot;Shank1&quot;, &quot;Cabp1&quot;, &quot;Slc27a4&quot;, &quot;Ptprs&quot;, &quot;Jup&quot;, &quot;Pcdh7&quot;, &quot;Rfx3&quot;, &quot;Ankzf1&quot;, &quot;Kdm6b&quot;, &quot;Hist3h2a&quot;, &quot;Gramd1a&quot;, &quot;Cdk14&quot;, &quot;Lcor&quot;, &quot;Elavl4&quot;, &quot;Slco5a1&quot;, &quot;Tmem44&quot;, &quot;Cntfr&quot;, &quot;Ikbkb&quot;, &quot;Ptpro&quot;, &quot;Mfap4&quot;, &quot;Ankrd12&quot;, &quot;Trim46&quot;, &quot;Atp6v1e1&quot;, &quot;Pcp4&quot;, &quot;Gcdh&quot;, &quot;Necab3&quot;, &quot;Cpeb4&quot;, &quot;Rab3a&quot;, &quot;Nuak1&quot;, &quot;9330133O14Rik&quot;, &quot;Frmd5&quot;, &quot;Frrs1l&quot;, &quot;Rcan2&quot;, &quot;Prdm8&quot;, &quot;Selk&quot;, &quot;Cdyl2&quot;, &quot;Dhtkd1&quot;, &quot;Kcnq2&quot;, &quot;Vps37c&quot;, &quot;Actg1&quot;, &quot;Gas8&quot;, &quot;Rwdd3&quot;, &quot;Sema6d&quot;, &quot;Ypel5&quot;, &quot;Cttnbp2&quot;, &quot;Islr2&quot;, &quot;Neurod6&quot;, &quot;Cbln2&quot;, &quot;Ncan&quot;, &quot;Fam57b&quot;, &quot;Atg9a&quot;, &quot;Ppp1r14a&quot;, &quot;Cdk5r1&quot;, &quot;Kalrn&quot;, &quot;Snap91&quot;, &quot;Tanc2&quot;, &quot;Crmp1&quot;, &quot;Edil3&quot;, &quot;Kif5a&quot;, &quot;Ralgps1&quot;, &quot;Disp2&quot;, &quot;Ass1&quot;, &quot;Tmsb4x&quot;, &quot;Dbc1&quot;, &quot;Mapre3&quot;, &quot;Zzef1&quot;, &quot;Gna12&quot;, &quot;Gstm7&quot;, &quot;Sv2b&quot;, &quot;Tiam2&quot;, &quot;Zfp46&quot;, &quot;Ank3&quot;, &quot;Calm2&quot;, &quot;Nrn1&quot;, &quot;Jph4&quot;, &quot;Snap25&quot;, &quot;Ttc3&quot;, &quot;Oscp1&quot;, &quot;Cntn2&quot;, &quot;Fam49a&quot;, &quot;Serpini1&quot;, &quot;Rab3c&quot;, &quot;Chst15&quot;, &quot;Sv2a&quot;, &quot;Dpysl3&quot;, &quot;Sema4g&quot;, &quot;Elavl3&quot;, &quot;Vps13c&quot;, &quot;Scn3a&quot;, &quot;Nav3&quot;, &quot;Cnr1&quot;, &quot;Atp2b2&quot;, &quot;Nnat&quot;, &quot;Rufy3&quot;, &quot;Tmsb10&quot;, &quot;Nefm&quot;, &quot;Tnfrsf21&quot;, &quot;Kif21b&quot;, &quot;Mcf2l&quot;, &quot;Stmn1&quot;, &quot;Gmnc&quot;, &quot;Hecw1&quot;, &quot;Enpp5&quot;, &quot;L1cam&quot;, &quot;Sorbs2&quot;, &quot;Cdc42ep2&quot;, &quot;Nmnat2&quot;, &quot;Tuba1a&quot;, &quot;Unc79&quot;, &quot;Scn3b&quot;, &quot;3632451O06Rik&quot;, &quot;Pde1c&quot;, &quot;Lrfn5&quot;, &quot;Rtn2&quot;, &quot;Gabrb2&quot;, &quot;Slc17a6&quot;, &quot;1700088E04Rik&quot;, &quot;Trappc6a&quot;, &quot;Psd&quot;, &quot;Hmgcll1&quot;, &quot;Nav1&quot;, &quot;Tub&quot;, &quot;Actl6b&quot;, &quot;March8&quot;, &quot;Pxk&quot;, &quot;Tbr1&quot;, &quot;Lrrc7&quot;, &quot;Akap6&quot;, &quot;Dscaml1&quot;, &quot;Dnajc6&quot;, &quot;Dopey2&quot;, &quot;Galnt14&quot;, &quot;Osbpl5&quot;, &quot;Mllt11&quot;, &quot;Sez6l2&quot;, &quot;Nxph4&quot;, &quot;Gabrg2&quot;, &quot;Tubb3&quot;, &quot;Chga&quot;, &quot;Gdi1&quot;, &quot;Dusp8&quot;, &quot;Cd200&quot;, &quot;Nrxn1&quot;, &quot;Ralyl&quot;, &quot;Mapk10&quot;, &quot;Sox11&quot;, &quot;Wnt7b&quot;, &quot;Ndrg4&quot;, &quot;Magel2&quot;, &quot;Cbln4&quot;, &quot;Dner&quot;, &quot;Myt1l&quot;, &quot;Dusp4&quot;, &quot;Map2&quot;, &quot;Syt4&quot;, &quot;Atp1a3&quot;, &quot;Smim18&quot;, &quot;Ppfia2&quot;, &quot;Plxna4&quot;, &quot;Rtn1&quot;, &quot;Map1b&quot;, &quot;Snrpn&quot;, &quot;Nrep&quot;, &quot;Dcx&quot;, &quot;Stmn2&quot;, &quot;Tagln3&quot;)
+weights2 &lt;- c(2.136911, 9.205157, 15.04057, 14.38306, 15.63322, 15.21329, 7.556623, 15.73863, 15.24225, 14.90353, 16.34308, 4.423723, 16.73704, 12.81987, 15.2705, 16.21419, 14.84824, 15.80225, 15.23299, 14.40521, 9.90502, 16.11969, 12.89575, 3.311071, 17.46972, 18.18689, 15.31839, 16.47549, 15.68371, 16.4865, 12.65875, 15.94118, 3.6415, 15.56466, 18.86522, 17.09324, 17.45138, 17.43719, 14.81852, 16.76695, 16.04711, 16.71587, 8.95732, 15.21574, 16.57723, 17.9463, 18.28922, 17.0956, 18.51236, 14.47279, 8.607997, 16.33777, 17.69629, 18.0779, 18.39833, 8.384968, 17.93645, 3.883598, 18.37481, 19.62326, 7.079478, 18.46066, 18.57387, 19.86684, 17.57067, 17.17134, 19.19559, 17.28012, 19.51456, 18.63038, 16.346, 11.30094, 11.65711, 3.8573, 18.27631, 19.3324, 10.47136, 19.1688, 7.534274, 12.81903, 16.9127, 17.81924, 17.61544, 10.82315, 20.32141, 19.71257, 18.33481, 19.41048, 18.02951, 20.99936, 20.16026, 18.26461, 9.186602, 21.50746, 16.10645, 22.00737, 8.978131, 21.77559, 21.36687, 20.04521, 19.50468, 21.11922, 18.66986, 17.83665, 5.94918, 16.38831, 13.5438, 18.87614, 20.60921, 4.189785, 22.75836, 23.09122, 17.50587, 11.29154, 22.14349, 22.18913, 27.94501, 22.19199, 9.658578, 21.14181, 21.52989, 21.78602, 23.19786, 24.72262, 24.1665, 20.88067, 16.71132, 24.0294, 23.02293, 20.88419, 15.83706, 16.24816, 6.450837, 23.94848, 23.94848, 25.70524, 19.99748, 26.62003, 22.178, 24.94079, 24.08407, 26.47341, 6.700568, 28.2764, 22.20154, 25.95458, 6.91906, 25.88305, 22.42306, 27.05859, 30.87535, 21.7612, 22.35798, 25.03427, 17.46535, 27.2852, 16.16853, 27.74718, 31.36692, 28.40496, 35.20579, 30.09073, 8.811513, 18.08419, 7.209913, 25.47581, 25.36688, 31.83581, 28.58641, 6.66765, 30.0685, 31.42778, 30.04373, 29.97091, 27.10214, 30.83477, 25.14173, 8.179623, 29.54644, 30.6819, 31.9696, 31.49879, 31.99548, 33.65421, 32.11973, 37.97322, 24.91364, 31.93946, 30.68069, 33.96646, 30.45905, 34.63189, 34.76243, 35.00472, 35.09193, 39.13838, 33.9888, 37.8095, 35.00221, 32.88669, 35.75556, 38.66944, 36.92484, 21.31074, 38.37572, 35.98967, 31.81786, 30.92585, 30.85406, 22.2424, 39.26337, 40.44131, 41.71698, 39.48613, 38.26427, 14.63608, 40.31382, 40.53405, 42.45989, 43.87076, 43.02692, 45.8313, 41.15421, 27.19848, 48.42665, 45.21538, 48.54704, 48.93636, 47.4931, 33.36695, 19.00539, 46.4681, 31.47316, 56.75082, 60.46812, 28.49932)
+gp3D &lt;- gene.plot(gl2, mat, gannot3D, plot=F, weights=weights2)
+</code></pre>
+
+<pre><code>## [1] &quot;Genes available:&quot;
+##  [1] &quot;Nfasc&quot;    &quot;Apc&quot;      &quot;Celsr3&quot;   &quot;Klf7&quot;     &quot;Nhlh2&quot;    &quot;Neurod1&quot; 
+##  [7] &quot;Apc2&quot;     &quot;Evl&quot;      &quot;Dcc&quot;      &quot;Cacna2d1&quot; &quot;Klhl29&quot;   &quot;Lcor&quot;    
+## [13] &quot;Mfap4&quot;    &quot;Pcp4&quot;     &quot;Rab3a&quot;    &quot;Sema6d&quot;   &quot;Cttnbp2&quot;  &quot;Neurod6&quot; 
+## [19] &quot;Cbln2&quot;    &quot;Cdk5r1&quot;   &quot;Tiam2&quot;    &quot;Zfp46&quot;    &quot;Ank3&quot;     &quot;Nrn1&quot;    
+## [25] &quot;Cntn2&quot;    &quot;Sema4g&quot;   &quot;Cnr1&quot;     &quot;Nnat&quot;     &quot;L1cam&quot;    &quot;Pde1c&quot;   
+## [31] &quot;Gabrb2&quot;   &quot;Slc17a6&quot;  &quot;Psd&quot;      &quot;Tbr1&quot;     &quot;Dscaml1&quot;  &quot;Nxph4&quot;   
+## [37] &quot;Gabrg2&quot;   &quot;Tubb3&quot;    &quot;Nrxn1&quot;    &quot;Mapk10&quot;   &quot;Sox11&quot;    &quot;Wnt7b&quot;   
+## [43] &quot;Cbln4&quot;    &quot;Dner&quot;     &quot;Myt1l&quot;    &quot;Plxna4&quot;   &quot;Dcx&quot;     
+## [1] &quot;Genes not available:&quot;
+##   [1] &quot;Ftl1&quot;          &quot;Stmn3&quot;         &quot;Rnf185&quot;        &quot;Serinc5&quot;      
+##   [5] &quot;Plk3&quot;          &quot;Khdrbs2&quot;       &quot;1810041L15Rik&quot; &quot;Klhdc5&quot;       
+##   [9] &quot;Plch2&quot;         &quot;Tram1l1&quot;       &quot;Plcl1&quot;         &quot;Calcoco1&quot;     
+##  [13] &quot;Gm2694&quot;        &quot;2510009E07Rik&quot; &quot;Srgap1&quot;        &quot;Nsg2&quot;         
+##  [17] &quot;Tmtc4&quot;         &quot;Nkain3&quot;        &quot;Actr2&quot;         &quot;Wdr83&quot;        
+##  [21] &quot;Ina&quot;           &quot;Celf3&quot;         &quot;Pak7&quot;          &quot;Slc4a8&quot;       
+##  [25] &quot;Gpr19&quot;         &quot;Fam5b&quot;         &quot;Gpr137&quot;        &quot;Atp6v1g1&quot;     
+##  [29] &quot;Shisa7&quot;        &quot;Slc35a1&quot;       &quot;Nme3&quot;          &quot;Fkbpl&quot;        
+##  [33] &quot;Frmd4b&quot;        &quot;Clvs1&quot;         &quot;Kif3c&quot;         &quot;Ank&quot;          
+##  [37] &quot;Mbnl2&quot;         &quot;Tubb4a&quot;        &quot;Brwd3&quot;         &quot;Sgip1&quot;        
+##  [41] &quot;Itm2b&quot;         &quot;Ccser1&quot;        &quot;Ndfip2&quot;        &quot;Yod1&quot;         
+##  [45] &quot;Vcan&quot;          &quot;Ppm1a&quot;         &quot;Hn1&quot;           &quot;Atl1&quot;         
+##  [49] &quot;Fam84a&quot;        &quot;Atp6v1f&quot;       &quot;Atg16l1&quot;       &quot;Rbfox1&quot;       
+##  [53] &quot;Pcnxl4&quot;        &quot;Jakmip2&quot;       &quot;Rab3d&quot;         &quot;Stxbp1&quot;       
+##  [57] &quot;Tspyl4&quot;        &quot;St8sia3&quot;       &quot;Mon2&quot;          &quot;Shank1&quot;       
+##  [61] &quot;Cabp1&quot;         &quot;Slc27a4&quot;       &quot;Ptprs&quot;         &quot;Jup&quot;          
+##  [65] &quot;Pcdh7&quot;         &quot;Rfx3&quot;          &quot;Ankzf1&quot;        &quot;Kdm6b&quot;        
+##  [69] &quot;Hist3h2a&quot;      &quot;Gramd1a&quot;       &quot;Cdk14&quot;         &quot;Elavl4&quot;       
+##  [73] &quot;Slco5a1&quot;       &quot;Tmem44&quot;        &quot;Cntfr&quot;         &quot;Ikbkb&quot;        
+##  [77] &quot;Ptpro&quot;         &quot;Ankrd12&quot;       &quot;Trim46&quot;        &quot;Atp6v1e1&quot;     
+##  [81] &quot;Gcdh&quot;          &quot;Necab3&quot;        &quot;Cpeb4&quot;         &quot;Nuak1&quot;        
+##  [85] &quot;9330133O14Rik&quot; &quot;Frmd5&quot;         &quot;Frrs1l&quot;        &quot;Rcan2&quot;        
+##  [89] &quot;Prdm8&quot;         &quot;Selk&quot;          &quot;Cdyl2&quot;         &quot;Dhtkd1&quot;       
+##  [93] &quot;Kcnq2&quot;         &quot;Vps37c&quot;        &quot;Actg1&quot;         &quot;Gas8&quot;         
+##  [97] &quot;Rwdd3&quot;         &quot;Ypel5&quot;         &quot;Islr2&quot;         &quot;Ncan&quot;         
+## [101] &quot;Fam57b&quot;        &quot;Atg9a&quot;         &quot;Ppp1r14a&quot;      &quot;Kalrn&quot;        
+## [105] &quot;Snap91&quot;        &quot;Tanc2&quot;         &quot;Crmp1&quot;         &quot;Edil3&quot;        
+## [109] &quot;Kif5a&quot;         &quot;Ralgps1&quot;       &quot;Disp2&quot;         &quot;Ass1&quot;         
+## [113] &quot;Tmsb4x&quot;        &quot;Dbc1&quot;          &quot;Mapre3&quot;        &quot;Zzef1&quot;        
+## [117] &quot;Gna12&quot;         &quot;Gstm7&quot;         &quot;Sv2b&quot;          &quot;Calm2&quot;        
+## [121] &quot;Jph4&quot;          &quot;Snap25&quot;        &quot;Ttc3&quot;          &quot;Oscp1&quot;        
+## [125] &quot;Fam49a&quot;        &quot;Serpini1&quot;      &quot;Rab3c&quot;         &quot;Chst15&quot;       
+## [129] &quot;Sv2a&quot;          &quot;Dpysl3&quot;        &quot;Elavl3&quot;        &quot;Vps13c&quot;       
+## [133] &quot;Scn3a&quot;         &quot;Nav3&quot;          &quot;Atp2b2&quot;        &quot;Rufy3&quot;        
+## [137] &quot;Tmsb10&quot;        &quot;Nefm&quot;          &quot;Tnfrsf21&quot;      &quot;Kif21b&quot;       
+## [141] &quot;Mcf2l&quot;         &quot;Stmn1&quot;         &quot;Gmnc&quot;          &quot;Hecw1&quot;        
+## [145] &quot;Enpp5&quot;         &quot;Sorbs2&quot;        &quot;Cdc42ep2&quot;      &quot;Nmnat2&quot;       
+## [149] &quot;Tuba1a&quot;        &quot;Unc79&quot;         &quot;Scn3b&quot;         &quot;3632451O06Rik&quot;
+## [153] &quot;Lrfn5&quot;         &quot;Rtn2&quot;          &quot;1700088E04Rik&quot; &quot;Trappc6a&quot;     
+## [157] &quot;Hmgcll1&quot;       &quot;Nav1&quot;          &quot;Tub&quot;           &quot;Actl6b&quot;       
+## [161] &quot;March8&quot;        &quot;Pxk&quot;           &quot;Lrrc7&quot;         &quot;Akap6&quot;        
+## [165] &quot;Dnajc6&quot;        &quot;Dopey2&quot;        &quot;Galnt14&quot;       &quot;Osbpl5&quot;       
+## [169] &quot;Mllt11&quot;        &quot;Sez6l2&quot;        &quot;Chga&quot;          &quot;Gdi1&quot;         
+## [173] &quot;Dusp8&quot;         &quot;Cd200&quot;         &quot;Ralyl&quot;         &quot;Ndrg4&quot;        
+## [177] &quot;Magel2&quot;        &quot;Dusp4&quot;         &quot;Map2&quot;          &quot;Syt4&quot;         
+## [181] &quot;Atp1a3&quot;        &quot;Smim18&quot;        &quot;Ppfia2&quot;        &quot;Rtn1&quot;         
+## [185] &quot;Map1b&quot;         &quot;Snrpn&quot;         &quot;Nrep&quot;          &quot;Stmn2&quot;        
+## [189] &quot;Tagln3&quot;
+</code></pre>
+
+<pre><code class="r">gpsect3D &lt;- structure.plot(cids, gp3D, gannot3D, plot=F)
+plot.projection.xray(vol3D, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.projection(gpsect3D, t=1, add=T)
+plot.slice.xray(vol3D, s2, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.slice(gpsect3D, s, t=1, add=T)
+# Comparison
+gp3D &lt;- gene.plot.weighted.comp(gl1, weights1, gl2, weights2, mat, gannot3D, plot=F)
+</code></pre>
+
+<pre><code>##  [1] &quot;Sox3&quot;     &quot;Trps1&quot;    &quot;Wwtr1&quot;    &quot;Clu&quot;      &quot;Fgfr2&quot;    &quot;Tyro3&quot;   
+##  [7] &quot;Mybl2&quot;    &quot;Sox2&quot;     &quot;Ptpru&quot;    &quot;Fn1&quot;      &quot;Hmgn2&quot;    &quot;Hes1&quot;    
+## [13] &quot;Hmgb1&quot;    &quot;Tgfb2&quot;    &quot;Tcf7l2&quot;   &quot;S1pr1&quot;    &quot;Cdca7l&quot;   &quot;Pdpn&quot;    
+## [19] &quot;Gpc3&quot;     &quot;Zfp36l1&quot;  &quot;Igfbp5&quot;   &quot;Notch2&quot;   &quot;Gatad2a&quot;  &quot;Nde1&quot;    
+## [25] &quot;Sfrp2&quot;    &quot;Gas1&quot;     &quot;Nmral1&quot;   &quot;Bmpr1b&quot;   &quot;Hspd1&quot;    &quot;Fzd10&quot;   
+## [31] &quot;Six5&quot;     &quot;Wnt5b&quot;    &quot;Nfasc&quot;    &quot;Apc&quot;      &quot;Celsr3&quot;   &quot;Klf7&quot;    
+## [37] &quot;Nhlh2&quot;    &quot;Neurod1&quot;  &quot;Apc2&quot;     &quot;Evl&quot;      &quot;Dcc&quot;      &quot;Cacna2d1&quot;
+## [43] &quot;Klhl29&quot;   &quot;Lcor&quot;     &quot;Mfap4&quot;    &quot;Pcp4&quot;     &quot;Rab3a&quot;    &quot;Sema6d&quot;  
+## [49] &quot;Cttnbp2&quot;  &quot;Neurod6&quot;  &quot;Cbln2&quot;    &quot;Cdk5r1&quot;   &quot;Tiam2&quot;    &quot;Zfp46&quot;   
+## [55] &quot;Ank3&quot;     &quot;Nrn1&quot;     &quot;Cntn2&quot;    &quot;Sema4g&quot;   &quot;Cnr1&quot;     &quot;Nnat&quot;    
+## [61] &quot;L1cam&quot;    &quot;Pde1c&quot;    &quot;Gabrb2&quot;   &quot;Slc17a6&quot;  &quot;Psd&quot;      &quot;Tbr1&quot;    
+## [67] &quot;Dscaml1&quot;  &quot;Nxph4&quot;    &quot;Gabrg2&quot;   &quot;Tubb3&quot;    &quot;Nrxn1&quot;    &quot;Mapk10&quot;  
+## [73] &quot;Sox11&quot;    &quot;Wnt7b&quot;    &quot;Cbln4&quot;    &quot;Dner&quot;     &quot;Myt1l&quot;    &quot;Plxna4&quot;  
+## [79] &quot;Dcx&quot;     
+##  [1]  13.72571000  14.06795000   8.90245800   6.52885800  12.59132000
+##  [6]  11.40345000   2.68022700  16.31190000   5.84663700  17.05004000
+## [11]   2.07766100  12.55257000   1.53705000   2.44428600  13.09234000
+## [16]   0.21015680   3.43679600   8.80287100   8.39326400   4.74180900
+## [21]   7.75927200   7.95622300   2.12210300   5.00987600   4.73798200
+## [26]   5.15106500   1.76073500   6.58945300   1.03363700   0.08547415
+## [31]   0.42030830   0.33004010 -15.21329000  -7.55662300 -14.90353000
+## [36] -15.23299000 -14.40521000 -18.86522000 -14.81852000 -16.71587000
+## [41]  -8.95732000 -18.51236000 -18.07790000 -17.61544000 -20.99936000
+## [46] -21.50746000 -21.77559000 -17.50587000 -22.14349000 -27.94501000
+## [51] -22.19199000 -23.19786000 -24.94079000 -24.08407000 -26.47341000
+## [56] -28.27640000 -22.42306000 -27.28520000 -35.20579000  -8.81151300
+## [61] -29.97091000 -31.49879000 -32.11973000 -37.97322000 -30.68069000
+## [66] -39.13838000 -35.00221000 -35.98967000 -31.81786000 -30.92585000
+## [71] -41.71698000 -38.26427000 -14.63608000 -40.31382000 -43.87076000
+## [76] -43.02692000 -45.83130000 -47.49310000 -56.75082000
+</code></pre>
+
+<pre><code class="r">gpsect3D &lt;- structure.plot(cids, gp3D, gannot3D, plot=F)
+plot.slice.xray(vol3D, s2, col=colorRampPalette(c(&quot;white&quot;, &quot;grey&quot;),space=&quot;Lab&quot;)(100), t=8)
+plot.slice.comp(gpsect3D, s, add=T)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-6-1.png" alt="plot of chunk unnamed-chunk-6"> <img src="figure/unnamed-chunk-6-2.png" alt="plot of chunk unnamed-chunk-6"> <img src="figure/unnamed-chunk-6-3.png" alt="plot of chunk unnamed-chunk-6"> <img src="figure/unnamed-chunk-6-4.png" alt="plot of chunk unnamed-chunk-6"> <img src="figure/unnamed-chunk-6-5.png" alt="plot of chunk unnamed-chunk-6"> </p>
+
+</body>
+
+</html>
