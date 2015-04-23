@@ -8,8 +8,8 @@ Maintainer: Jean Fan <jeanfan@fas.harvard.edu>
 Description: 
 License: MIT
 LazyData: TRUE
-Suggests: knitr
 VignetteBuilder: knitr
 Suggests: 
+    knitr,     
     rgl,
     lattice
