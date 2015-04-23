@@ -1,5 +1,5 @@
-# Explicitly send your builds to the container-based infrastructure
-sudo: false
+# Enable installation
+sudo: true
 
 # Use R
 language: r
