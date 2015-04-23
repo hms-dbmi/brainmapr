@@ -5,11 +5,10 @@ Version: 0.1
 Date: 2015-03-16
 Author: Jean Fan
 Maintainer: Jean Fan <jeanfan@fas.harvard.edu>
-Description: 
+Description:
 License: MIT
 LazyData: TRUE
 VignetteBuilder: knitr
-Suggests: 
-    knitr,     
-    rgl,
-    lattice
+Suggests:
+    knitr,
+    rgl

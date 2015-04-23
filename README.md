@@ -34,5 +34,5 @@ Gene expression signature for a proximal distal group of neurons within the fore
 ![](sample_images/mouse_slice_gene_exp.png)
 
 ## Vignettes
-[Getting Started with brainmapr](vignettes/brainmapr-vignette.pdf)  
-[Practical applications of brainmapr](vignettes/pagoda-vignette.pdf)
+[Getting Started with brainmapr](vignettes/brainmapr-vignette.md)  
+[Practical applications of brainmapr](vignettes/pagoda-vignette.md)

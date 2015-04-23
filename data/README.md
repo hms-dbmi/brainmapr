@@ -1,6 +1,6 @@
 # Available Package Data
 
-Full datasets are too big to include in the package. A small expressed set from embryonic 11.5 day mice (E11.5) has been provided as an example. Full datasets are available under `data-raw/RData`
+Full datasets are too big to include in the package. A small expressed set from embryonic 11.5 day mice (E11.5) has been provided as an example. Full datasets can be downloaded from the [Kharchenko lab website](http://pklab.med.harvard.edu/jean/brainmapr/data-raw/) due to file size limitations on GitHub.
 
 ## Generating sample data  
 
