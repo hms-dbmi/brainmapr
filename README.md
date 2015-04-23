@@ -1,5 +1,15 @@
 #brainmapr
 
+[![Build Status](https://travis-ci.org/JEFworks/brainmapr.svg?branch=master)](https://travis-ci.org/JEFworks/brainmapr)
+
+---
+TODO:
+- Make vignettes into PDFs, avoid rebuilding each time  
+- Link to data-raw/ files on pk; organize data-raw/ files on pk
+- Port to C++ for faster matrix calculations   
+
+---
+
 `brainmapr` visualizes and analyzes 3D ISH gene expression data from the Allen Brain Atlas. Our goal in developing `brainmapr` was to spatially place groups of neuronal cells within a region of the brain on interest based on their gene expression signatures identified from single cell RNA-seq.
 
 ## Installation
