@@ -13,3 +13,9 @@ warnings_are_errors: true
 # Turn off email notifications
 nortifications:
   email: false
+
+# Codecov integration
+r_github_packages:
+  - jimhester/covr
+after_success:
+  - Rscript -e 'library(covr);codecov()'

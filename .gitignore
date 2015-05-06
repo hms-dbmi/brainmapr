@@ -2,6 +2,7 @@
 .*~
 .DS_Store
 .Rbuildignore
+.Rhistory
 .Rproj.user
 .git
 inst/doc
