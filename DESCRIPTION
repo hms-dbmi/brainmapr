@@ -7,7 +7,7 @@ Date: 2015-03-16
 Author: Jean Fan [aut, cre]
 Authors@R: c(
     person("Jean", "Fan", role = c("aut", "cre"),
-	         email = "jeanfan@fas.harvard.edu"),
+	         email = "jeanfan@fas.harvard.edu")
     )
 Maintainer: Jean Fan <jeanfan@fas.harvard.edu>
 License: MIT
