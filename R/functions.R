@@ -219,7 +219,15 @@ plotProjection <- function(mat3D, col=colorRampPalette(c("white","black","red","
   projmat <- apply(mat3D, 2, rowSums, na.rm=T)
   image(projmat, col=col, zlim=c(t, max(projmat, na.rm=T)), asp=1, add=add)
 }
-#' Set the colors to look more like an x-ray
+#' Plot flat projection of a 3D volume with colors set to look more like an x-ray
+#'
+#' @param mat3D 3D volume
+#' @param col Color
+#' @param t Threshold used to remove noise
+#' @param add Boolean whether to overlay onto existing plot
+#'
+#' @keywords plot
+#'
 plotProjectionXray <- function(mat3D, col=colorRampPalette(c("white", "black"),space="Lab")(100), t=0, add=F) {
   plotProjection(mat3D, col, t=t, add=add)
 }

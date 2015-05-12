@@ -2,7 +2,7 @@ Package: brainmapr
 Type: Package
 Title: Visualizes ISH gene expression data from the Allen Brain Atlas
 Description: Spatial localization of neural progenitor cells within the developing mammalian brain plays an important role in neuronal fate determination and maturation. brainmapr infers spatial location of neural progenitor subpopulations within the developing mouse brain by integrating single-cell RNA-seq data with in situ RNA patterns from the Allen Developing Mouse Brain Atlas.
-Version: 0.9
+Version: 0.9.1
 Date: 2015-03-16
 Author: Jean Fan [aut, cre]
 Authors@R: c(
