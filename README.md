@@ -35,14 +35,14 @@ Please see the following vignettes for usage examples:
 ### Sample images/output
 
 Projection of an embryonic 13.5 day old mouse  
-![](sample_images/mouse_projection.png)
+![](sample/mouse_projection.png)
 
 
 Forebrain highlighted structure highlighted in a slice of an embryonic 13.5 day old mouse  
-![](sample_images/mouse_slice_forebrain.png)
+![](sample/mouse_slice_forebrain.png)
 
 
 Gene expression signature for a proximal distal group of neurons within the forebrain of an embryonic 13.5 day old mouse  
-![](sample_images/mouse_slice_gene_exp.png)
+![](sample/mouse_slice_gene_exp.png)
 
 
