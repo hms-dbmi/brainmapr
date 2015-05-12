@@ -1,4 +1,10 @@
 # Tests for travis
+data(vol3D)
+data(structureID)
+data(gannot3D)
+data(annot3D)
+data(mat)
+
 # Basic tests
 plotProjectionXray(vol3D, t=8)
 s <- 15 # slice
