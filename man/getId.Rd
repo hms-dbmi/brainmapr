@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{getId}
 \alias{getId}
-\title{A recursive way to get structure IDs and names of structure given an exact name string. Used by getStructureIds()}
+\title{A recursive way to get structure IDs and names of structure given an exact name string. Used by \code{\link{getStructureIds}}}
 \usage{
 getId(nestedList, name)
 }
@@ -15,10 +15,13 @@ getId(nestedList, name)
 cids Structure ID
 }
 \description{
-A recursive way to get structure IDs and names of structure given an exact name string. Used by getStructureIds()
+A recursive way to get structure IDs and names of structure given an exact name string. Used by \code{\link{getStructureIds}}
 }
 \examples{
 data(structureID)
 getId(structureID, 'pallium')
 }
+\keyword{browse,}
+\keyword{helper}
+\keyword{search,}
 

@@ -24,4 +24,10 @@ exp3D 3D volume restricted to weighted gene expression set of interest
 \description{
 Plot total expression of a set of genes
 }
+\examples{
+data(mat)
+data(gannot3D)
+genePlot('Dcx', mat, gannot3D, plot=F)
+}
+\keyword{plot}
 

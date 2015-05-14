@@ -6,7 +6,27 @@
 \usage{
 genePlotWeightedComp(gl1, weights1, gl2, weights2, expmat, gannot, plot = F)
 }
+\arguments{
+\item{gl1}{List of differentially expressed genes upregulated in cell group 1}
+
+\item{weights1}{List of weights corresponding to genes in \code{gl1}}
+
+\item{gl2}{List of differentially expressed genes upregulated in cell group 2}
+
+\item{weights2}{List of weights corresponding to genes in \code{gl2}}
+
+\item{expmat}{3D volume of expression}
+
+\item{gannot}{3D annotation of volume with structure IDs}
+
+\item{plot}{Boolean of whether to make 3D plot}
+}
+\value{
+exp3D 3D volume of weighted expression for gene lists of interest
+}
 \description{
 Relative expression of two groups using absolute differences
 }
+\keyword{comparison,}
+\keyword{placement}
 

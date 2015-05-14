@@ -2,12 +2,20 @@
 % Please edit documentation in R/functions.R
 \name{plotProjectionXray}
 \alias{plotProjectionXray}
-\title{Set the colors to look more like an x-ray}
+\title{\code{\link{plotProjection}} with colors set to look more like an x-ray}
 \usage{
-plotProjectionXray(mat3D, col = colorRampPalette(c("white", "black"), space =
-  "Lab")(100), t = 0, add = F)
+plotProjectionXray(mat3D, t = 0, add = F)
+}
+\arguments{
+\item{mat3D}{3D volume}
+
+\item{t}{Threshold used to remove noise}
+
+\item{add}{Boolean whether to overlay onto existing plot}
 }
 \description{
-Set the colors to look more like an x-ray
+\code{\link{plotProjection}} with colors set to look more like an x-ray
 }
+\keyword{modification}
+\keyword{plot,}
 

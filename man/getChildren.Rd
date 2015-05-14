@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{getChildren}
 \alias{getChildren}
-\title{A recursive way to get all the children of a Structure given its ID. Used by getStructureIds()}
+\title{A recursive way to get all the children of a Structure given its ID. Used by \code{\link{getStructureIds}}}
 \usage{
 getChildren(nestedList, sid)
 }
@@ -15,10 +15,13 @@ getChildren(nestedList, sid)
 cids The Structure children's IDs
 }
 \description{
-A recursive way to get all the children of a Structure given its ID. Used by getStructureIds()
+A recursive way to get all the children of a Structure given its ID. Used by \code{\link{getStructureIds}}
 }
 \examples{
 data(structureID)
 getChildren(structureID, 15903)
 }
+\keyword{browse,}
+\keyword{helper}
+\keyword{search,}
 

@@ -2,12 +2,26 @@
 % Please edit documentation in R/functions.R
 \name{plotSliceXray}
 \alias{plotSliceXray}
-\title{Set the colors to look more like an x-ray}
+\title{\code{\link{plotSlice}} with colors set to look more like an x-ray}
 \usage{
-plotSliceXray(mat3D, slice, col = colorRampPalette(c("white", "black"), space
-  = "Lab")(100), t = 0, add = F)
+plotSliceXray(mat3D, slice, t = 0, add = F)
+}
+\arguments{
+\item{mat3D}{3D volume}
+
+\item{slice}{Index of slice; limited to dimensions of mat3D}
+
+\item{t}{Threshold used to remove noise}
+
+\item{add}{Boolean whether to overlay onto existing plot}
 }
 \description{
-Set the colors to look more like an x-ray
+\code{\link{plotSlice}} with colors set to look more like an x-ray
 }
+\examples{
+data(vol3D)
+plotSliceXray(vol3D, 75, t=8)
+}
+\keyword{modification}
+\keyword{plot,}
 

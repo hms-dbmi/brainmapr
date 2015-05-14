@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{plotEnergy}
 \alias{plotEnergy}
-\title{Helper function for 3D plotting. Used by structurePlot() and genePlot()}
+\title{Helper function for 3D plotting. Used by \code{\link{structurePlot}} and \code{\link{genePlot}}}
 \usage{
 plotEnergy(exp, x, y, z)
 }
@@ -16,6 +16,8 @@ plotEnergy(exp, x, y, z)
 \item{z}{z-dimension of volume}
 }
 \description{
-Helper function for 3D plotting. Used by structurePlot() and genePlot()
+Helper function for 3D plotting. Used by \code{\link{structurePlot}} and \code{\link{genePlot}}
 }
+\keyword{helper}
+\keyword{plot,}
 

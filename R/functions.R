@@ -12,14 +12,13 @@
 #'
 #' @return ids A dictionary of Structures that contain the name with their IDs
 #'
-#' @keywords browse, search
-#'
-#' @export
-#'
 #' @examples
 #' data(structureID)
 #' getIds(structureID, 'pallium')
 #'
+#' @keywords browse, search
+#'
+#' @export
 getIds <- function(nestedList, name) {
   ids <- {}
   ## recursive component
@@ -51,14 +50,13 @@ getIds <- function(nestedList, name) {
 #' @param sid id The structure ID
 #' @return n Brain structure name
 #'
-#' @keywords browse, search
-#'
-#' @export
-#'
 #' @examples
 #' data(structureID)
 #' getName(structureID, 15903)
 #'
+#' @keywords browse, search
+#'
+#' @export
 getName <- function(nestedList, sid) {
   n <- "not found"
   getNameHelper <- function(nestedList, sid, n) {
@@ -78,7 +76,7 @@ getName <- function(nestedList, sid) {
 }
 
 
-#' A recursive way to get structure IDs and names of structure given an exact name string. Used by getStructureIds()
+#' A recursive way to get structure IDs and names of structure given an exact name string. Used by \code{\link{getStructureIds}}
 #'
 #' @param nestedList A JSON derived nested list of Structure relationships from Allen Brain Atlas's structure graph
 #' @param name Structure's name
@@ -89,6 +87,9 @@ getName <- function(nestedList, sid) {
 #' data(structureID)
 #' getId(structureID, 'pallium')
 #'
+#' @keywords browse, search, helper
+#'
+#' @export
 getId <- function(nestedList, name) {
   cids <- "not found"
   getIdHelper <- function(nestedList, name, cids) {
@@ -106,7 +107,8 @@ getId <- function(nestedList, name) {
   getIdHelper(nestedList, name, cids)
   return(cids)
 }
-#' A recursive way to get all the children of a Structure given its ID. Used by getStructureIds()
+
+#' A recursive way to get all the children of a Structure given its ID. Used by \code{\link{getStructureIds}}
 #'
 #' @param nestedList A JSON derived nested list of structure relationships from Allen Brain Atlas's structure graph
 #' @param sid The Structure's ID
@@ -117,6 +119,9 @@ getId <- function(nestedList, name) {
 #' data(structureID)
 #' getChildren(structureID, 15903)
 #'
+#' @keywords browse, search, helper
+#'
+#' @export
 getChildren <- function(nestedList, sid) {
   cids <- c()
   getChildrenHelper <- function(nestedList, sid) {
@@ -138,6 +143,7 @@ getChildren <- function(nestedList, sid) {
   getChildrenHelper(nestedList, sid)
   return(cids)
 }
+
 #' Get IDs associated with a Structure given the exact Structure name
 #'
 #' In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. With the exception of the "root" structure, each Structure has one parent and denotes a "part-of" relationship. Due to this relationship, a Structure's total volume is denoted by both its own IDs and also that of its children's IDs. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureIDRda. This function allows you to obtain all IDs associated with a Structure given its exact name.
@@ -147,14 +153,13 @@ getChildren <- function(nestedList, sid) {
 #'
 #' @return cids The Structure's ID and all its children's IDs
 #'
-#' @keywords browse, search
-#'
-#' @export
-#'
 #' @examples
 #' data(structureID)
 #' getStructureIds(structureID, 'pallium')
 #'
+#' @keywords browse, search
+#'
+#' @export
 getStructureIds <- function(nestedList, name) {
   sid <- getId(nestedList, name)
   cids <- c(sid, getChildren(nestedList, sid))
@@ -175,23 +180,50 @@ getStructureIds <- function(nestedList, name) {
 #' @param t Threshold used to remove noise
 #' @param add Boolean whether to overlay onto existing plot
 #'
-#' @keywords plot
-#'
-#' @export
-#'
 #' @examples
 #' data(vol3D)
 #' plotSlice(vol3D, 75, t=8)
 #'
+#' @keywords plot
+#'
+#' @export
 plotSlice <- function(mat3D, slice, col=colorRampPalette(c("white","black","red","yellow"),space="Lab")(100), t=0, add=F) {
   matT <- mat3D[,,slice]
   image(matT, col=col, zlim=c(t, max(matT, na.rm=T)), asp=1, add=add)  # fix aspect ratio
 }
-#' Set the colors to look more like an x-ray
-plotSliceXray <- function(mat3D, slice, col=colorRampPalette(c("white", "black"),space="Lab")(100), t=0, add=F) {
-  plotSlice(mat3D, slice, col, t=t, add=add)
+
+#' \code{\link{plotSlice}} with colors set to look more like an x-ray
+#'
+#' @param mat3D 3D volume
+#' @param slice Index of slice; limited to dimensions of mat3D
+#' @param t Threshold used to remove noise
+#' @param add Boolean whether to overlay onto existing plot
+#'
+#' @examples
+#' data(vol3D)
+#' plotSliceXray(vol3D, 75, t=8)
+#'
+#' @keywords plot, modification
+#'
+#' @export
+plotSliceXray <- function(mat3D, slice, t=0, add=F) {
+  plotSlice(mat3D, slice, col=colorRampPalette(c("white", "black"),space="Lab")(100), t=t, add=add)
 }
-#' Compare 2 regions
+
+#' Plot slice of 3D volume without thresholding and allowing for negative expression values. Used for comparing spatial expression of upregulated vs. downregulated gene sets.
+#'
+#' @param mat3D 3D volume
+#' @param slice Index of slice; limited to dimensions of mat3D
+#' @param t Threshold used to remove noise
+#' @param add Boolean whether to overlay onto existing plot
+#'
+#' @examples
+#' data(vol3D)
+#' plotSliceComp(vol3D, 75)
+#'
+#' @keywords plot
+#'
+#' @export
 plotSliceComp <- function(mat3D, slice, col=colorRampPalette(c("green","blue", "black","red","yellow"),space="Lab")(100), add=F) {
   matT <- mat3D[,,slice]
   image(matT, col=col, zlim=c(min(matT, na.rm=T), max(matT, na.rm=T)), asp=1, add=add)  # fix aspect ratio
@@ -205,41 +237,44 @@ plotSliceComp <- function(mat3D, slice, col=colorRampPalette(c("green","blue", "
 #' @param t Threshold used to remove noise
 #' @param add Boolean whether to overlay onto existing plot
 #'
-#' @keywords plot
-#'
-#' @export
-#'
 #' @examples
 #' data(vol3D)
 #' plotProjection(vol3D, t=8)
 #'
+#' @keywords plot
+#'
+#' @export
 plotProjection <- function(mat3D, col=colorRampPalette(c("white","black","red","yellow"),space="Lab")(100), t=0, add=F) {
   # threshold to get rid of noise
   mat3D[mat3D <= t] <- 0
   projmat <- apply(mat3D, 2, rowSums, na.rm=T)
   image(projmat, col=col, zlim=c(t, max(projmat, na.rm=T)), asp=1, add=add)
 }
-#' Plot flat projection of a 3D volume with colors set to look more like an x-ray
+
+#' \code{\link{plotProjection}} with colors set to look more like an x-ray
 #'
 #' @param mat3D 3D volume
-#' @param col Color
 #' @param t Threshold used to remove noise
 #' @param add Boolean whether to overlay onto existing plot
 #'
-#' @keywords plot
+#' @keywords plot, modification
 #'
-plotProjectionXray <- function(mat3D, col=colorRampPalette(c("white", "black"),space="Lab")(100), t=0, add=F) {
-  plotProjection(mat3D, col, t=t, add=add)
+#' @export
+plotProjectionXray <- function(mat3D, t=0, add=F) {
+  plotProjection(mat3D, col=colorRampPalette(c("white", "black"),space="Lab")(100), t=t, add=add)
 }
 
 
-#' Helper function for 3D plotting. Used by structurePlot() and genePlot()
+#' Helper function for 3D plotting. Used by \code{\link{structurePlot}} and \code{\link{genePlot}}
 #'
 #' @param exp vector representation of volume
 #' @param x x-dimension of volume
 #' @param y y-dimension of volume
 #' @param z z-dimension of volume
 #'
+#' @keywords plot, helper
+#'
+#' @export
 plotEnergy <- function(exp, x, y, z) {
   eyv <- asDataFrame(asTable(exp))
   col <- colorRampPalette(c("white","black","red","yellow"),space="Lab")(100)
@@ -258,12 +293,14 @@ plotEnergy <- function(exp, x, y, z) {
     zlim=c(0,z)
   )
 }
+
 #' Plot the volume or expression within a Structure
 #'
 #' @param cids Structure ids
 #' @param vol 3D volume of expression values
 #' @param annot 3D annotation of volume with structure IDs
 #' @param plot Boolean of whether to make 3D plot
+#'
 #' @return tvol 3D volume restricted to just structure of interest
 #'
 #' @examples
@@ -271,9 +308,12 @@ plotEnergy <- function(exp, x, y, z) {
 #' data(vol3D)
 #' data(annot3D)
 #' cids <- getStructureIds(structureID, 'pallium')
-#' structurePlot(cids, vol3D, annot3D, plot=T)  # For whole structure
-#' structurePlot(cids, array(mat[gene,], dim=dim(gannot3D)), gannot3D, plot=T)  # For a particular gene
+#' structurePlot(cids, vol3D, annot3D)  # For whole structure
+#' structurePlot(cids, array(mat[gene,], dim=dim(gannot3D)), gannot3D)  # For a particular gene
 #'
+#' @keywords plot
+#'
+#' @export
 structurePlot <- function(cids, vol, annot, plot=F) {
   ## remove structures not in cids
   vol[!(annot %in% cids)] <- NA
@@ -282,6 +322,7 @@ structurePlot <- function(cids, vol, annot, plot=F) {
   }
   return(vol)
 }
+
 #' Plot total expression of a set of genes
 #'
 #' @param gl Gene list
@@ -295,8 +336,11 @@ structurePlot <- function(cids, vol, annot, plot=F) {
 #' @examples
 #' data(mat)
 #' data(gannot3D)
-#' genePlot('Dcx', mat, gannot3D, plot=F)
+#' genePlot('Dcx', mat, gannot3D)
 #'
+#' @keywords plot
+#'
+#' @export
 genePlot <- function(gl, expmat, gannot, t=0, weights=rep(1, length(gl)), plot=F) {
 
   # see what genes we have ISH data available
@@ -338,6 +382,20 @@ genePlot <- function(gl, expmat, gannot, t=0, weights=rep(1, length(gl)), plot=F
 #####
 
 #' Relative expression of two groups using absolute differences
+#'
+#' @param gl1 List of differentially expressed genes upregulated in cell group 1
+#' @param weights1 List of weights corresponding to genes in \code{gl1}
+#' @param gl2 List of differentially expressed genes upregulated in cell group 2
+#' @param weights2 List of weights corresponding to genes in \code{gl2}
+#' @param expmat 3D volume of expression
+#' @param gannot 3D annotation of volume with structure IDs
+#' @param plot Boolean of whether to make 3D plot
+#'
+#' @return exp3D 3D volume of weighted expression for gene lists of interest
+#'
+#' @keywords comparison, placement
+#'
+#' @export
 genePlotWeightedComp <- function(gl1, weights1, gl2, weights2, expmat, gannot, plot=F) {
   gl <- c(gl1, gl2)
   weights <- c(weights1, -weights2)
@@ -370,6 +428,20 @@ genePlotWeightedComp <- function(gl1, weights1, gl2, weights2, expmat, gannot, p
 }
 
 #' Relative expression of two groups using ratios
+#'
+#' @param gl1 List of differentially expressed genes upregulated in cell group 1
+#' @param weights1 List of weights corresponding to genes in \code{gl1}
+#' @param gl2 List of differentially expressed genes upregulated in cell group 2
+#' @param weights2 List of weights corresponding to genes in \code{gl2}
+#' @param expmat 3D volume of expression
+#' @param gannot 3D annotation of volume with structure IDs
+#' @param plot Boolean of whether to make 3D plot
+#'
+#' @return exp3D 3D volume of weighted expression for gene lists of interest
+#'
+#' @keywords comparison, placement
+#'
+#' @export
 genePlotWeightedComp2 <- function(gl1, weights1, gl2, weights2, expmat, gannot, plot=F) {
 
   gl1Have <- gl1[gl1 %in% rownames(expmat)]

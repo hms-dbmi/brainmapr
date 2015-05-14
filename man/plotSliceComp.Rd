@@ -2,12 +2,26 @@
 % Please edit documentation in R/functions.R
 \name{plotSliceComp}
 \alias{plotSliceComp}
-\title{Compare 2 regions}
+\title{Plot slice of 3D volume without thresholding and allowing for negative expression values. Used for comparing spatial expression of upregulated vs. downregulated gene sets.}
 \usage{
 plotSliceComp(mat3D, slice, col = colorRampPalette(c("green", "blue", "black",
   "red", "yellow"), space = "Lab")(100), add = F)
 }
-\description{
-Compare 2 regions
+\arguments{
+\item{mat3D}{3D volume}
+
+\item{slice}{Index of slice; limited to dimensions of mat3D}
+
+\item{add}{Boolean whether to overlay onto existing plot}
+
+\item{t}{Threshold used to remove noise}
 }
+\description{
+Plot slice of 3D volume without thresholding and allowing for negative expression values. Used for comparing spatial expression of upregulated vs. downregulated gene sets.
+}
+\examples{
+data(vol3D)
+plotSliceComp(vol3D, 75)
+}
+\keyword{plot}
 
