@@ -27,7 +27,7 @@ data(vol3D)
 data(annot3D)
 cids <- getStructureIds(structureID, 'pallium')
 sect3D <- structurePlot(cids, vol3D, annot3D)  # For whole structure
-gpsect3D <- structurePlot(cids, array(mat[gene,], dim=dim(gannot3D)), gannot3D)  # For a particular gene
+gpsect3D <- structurePlot(cids, array(mat['Dcx',], dim=dim(gannot3D)), gannot3D)  # For a particular gene
 }
 \keyword{plot}
 
