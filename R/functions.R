@@ -496,7 +496,12 @@ genePlotWeightedComp2 <- function(gl1, weights1, gl2, weights2, expmat, gannot, 
   exp1 <- expmat[gl1Have,]
   exp1 <- exp1 * weights1Have
   exp1[exp1 < 0] = 0
-  exp1Int <- colMeans(exp1, na.rm=T)
+
+  if(length(gl1Have) > 1) {
+    exp1Int <- colMeans(exp1, na.rm=T)
+  } else {
+    exp1Int <- exp1
+  }
   #exp1Int <- exp1Int/(max(exp1Int, na.rm=T)+1e-10)  # normalize to be comparable
 
   gl2Have <- gl2[gl2 %in% rownames(expmat)]
@@ -504,7 +509,12 @@ genePlotWeightedComp2 <- function(gl1, weights1, gl2, weights2, expmat, gannot, 
   exp2 <- expmat[gl2Have,]
   exp2 <- exp2 * weights2Have
   exp2[exp2 < 0] = 0
-  exp2Int <- colMeans(exp2, na.rm=T)
+
+  if(length(gl2Have) > 1) {
+    exp2Int <- colMeans(exp2, na.rm=T)
+  } else {
+    exp2Int <- exp2
+  }
   #exp2Int <- exp2Int/(max(exp2Int, na.rm=T)+1e-10)  # normalize to be comparable
 
   # fold change
