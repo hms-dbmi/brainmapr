@@ -44,5 +44,6 @@ after_script:
 ## CodeCov
 r_github_packages:
   - jimhester/covr
+  - JEFworks/brainmapr
 after_success:
-  - Rscript -e 'library(covr); coveralls()'
+  - Rscript -e 'library(covr); codecov()'
