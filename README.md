@@ -1,4 +1,7 @@
-#brainmapr [![Build Status](https://travis-ci.org/JEFworks/brainmapr.svg?branch=master)](https://travis-ci.org/JEFworks/brainmapr)
+#brainmapr 
+
+[![Build Status](https://travis-ci.org/JEFworks/brainmapr.svg?branch=master)](https://travis-ci.org/JEFworks/brainmapr)  
+[![codecov.io](http://codecov.io/github/JEFworks/brainmapr/coverage.svg?branch=master)](http://codecov.io/github/JEFworks/brainmapr?branch=master)  
 
 Spatial localization of neural progenitor cells within the developing mammalian brain plays an important role in neuronal fate determination and maturation. We developed `brainmapr` to the infer spatial location of neural progenitor subpopulations within the developing mouse brain by integrating single-cell RNA-seq data with in situ RNA patterns from the [Allen Developing Mouse Brain Atlas](http://mouse.brain-map.org/). Putative novel neural progenitor subpopulations are first identified using single-cell RNA-seq data. [Single cell differential expression](http://pklab.med.harvard.edu/scde/index.html) analysis identifies gene expression signatures associated with each subpopulation. We then use in situ expression patterns for these genes to spatially localize each subpopulation to demonstrate spatial segregation of subpopulations. 
 
