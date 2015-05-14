@@ -1,4 +1,6 @@
 # Tests for travis
+library(brainmapr)
+
 data(vol3D)
 data(structureID)
 data(gannot3D)
