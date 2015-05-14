@@ -12,9 +12,9 @@ plotSliceComp(mat3D, slice, col = colorRampPalette(c("green", "blue", "black",
 
 \item{slice}{Index of slice; limited to dimensions of mat3D}
 
-\item{add}{Boolean whether to overlay onto existing plot}
+\item{col}{Color}
 
-\item{t}{Threshold used to remove noise}
+\item{add}{Boolean whether to overlay onto existing plot}
 }
 \description{
 Plot slice of 3D volume without thresholding and allowing for negative expression values. Used for comparing spatial expression of upregulated vs. downregulated gene sets.

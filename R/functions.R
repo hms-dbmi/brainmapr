@@ -1,3 +1,49 @@
+##' brainmapr
+##'
+##' R package to infer spatial location of neuronal subpopulations within the developing mouse brain by integrating single-cell RNA-seq data with in situ RNA patterns from the Allen Developing Mouse Brain Atlas
+##' More extensive tutorials are available at \url{https://github.com/JEFworks/brainmapr}.
+##'
+##' @name brainmapr
+##' @docType package
+##' @author Jean Fan \email{jeanfan@@fas.harvard.edu}
+NULL
+
+
+#####
+# Sample datasets
+#####
+
+##' Pixel level 3D Structure annotations of the embryonic 11.5 day old mouse brain
+##' @format 3D array
+##' @docType data
+##' @references \url{http://developingmouse.brain-map.org/}
+"annot3D"
+
+##' Voxel level 3D Structure annotations of the embryonic 11.5 day old mouse brain
+##' @format 3D array
+##' @docType data
+##' @references \url{http://developingmouse.brain-map.org/}
+"gannot3D"
+
+##' Matrix of gene expression where each row corresponds to a gene and columns correspond to 3D locations in space
+##' @format 2D array (matrix)
+##' @docType data
+##' @references \url{http://developingmouse.brain-map.org/}
+"mat"
+
+##' Parsed StructureGraph for the developing mouse brain. Contains structure IDs and names in a hierarchical format.
+##' @format 3D array
+##' @docType data
+##' @references \url{http://developingmouse.brain-map.org/}
+"structureID"
+
+##' Pixel level 3D volume of the embryonic 11.5 day old mouse brain
+##' @format 3D array
+##' @docType data
+##' @references \url{http://developingmouse.brain-map.org/}
+"vol3D"
+
+
 #####
 ## ID and name parsing related functions
 #####
@@ -5,7 +51,7 @@
 
 #' A recursive way to get IDs and names of structure given a name substring
 #'
-#' In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureIDRda. This function allows you to browse Structures by name and ID given a name substring.
+#' In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureID.rda. This function allows you to browse Structures by name and ID given a name substring.
 #'
 #' @param nestedList A JSON derived nested list of Structure relationships from Allen Brain Atlas's StructureGraph
 #' @param name Brain structure name substring
@@ -44,7 +90,7 @@ getIds <- function(nestedList, name) {
 
 #' A recursive way to get the name of a Structure given its ID
 #'
-#' In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureIDRda. This function allows you to retrieve the name of a Structures given its ID.
+#' In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureID.rda. This function allows you to retrieve the name of a Structures given its ID.
 #'
 #' @param nestedList A JSON derived nested list of Structure relationships from Allen Brain Atlas's StructureGraph
 #' @param sid id The structure ID
@@ -146,7 +192,7 @@ getChildren <- function(nestedList, sid) {
 
 #' Get IDs associated with a Structure given the exact Structure name
 #'
-#' In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. With the exception of the "root" structure, each Structure has one parent and denotes a "part-of" relationship. Due to this relationship, a Structure's total volume is denoted by both its own IDs and also that of its children's IDs. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureIDRda. This function allows you to obtain all IDs associated with a Structure given its exact name.
+#' In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. With the exception of the "root" structure, each Structure has one parent and denotes a "part-of" relationship. Due to this relationship, a Structure's total volume is denoted by both its own IDs and also that of its children's IDs. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureID.rda. This function allows you to obtain all IDs associated with a Structure given its exact name.
 #'
 #' @param nestedList A JSON derived nested list of structure relationships from Allen Brain Atlas's StructureGraph
 #' @param name Structure's name
@@ -276,16 +322,16 @@ plotProjectionXray <- function(mat3D, t=0, add=F) {
 #'
 #' @export
 plotEnergy <- function(exp, x, y, z) {
-  eyv <- asDataFrame(asTable(exp))
+  eyv <- as.data.frame(as.table(exp))
   col <- colorRampPalette(c("white","black","red","yellow"),space="Lab")(100)
   # normalize
   vi <- eyv[,4]>0;
   pc <- col[pmax(1,round(eyv[,4]/max(eyv[,4])*length(col)))]
   # 3D plot
   rgl::plot3d(
-    asInteger(eyv[vi,1]),
-    asInteger(eyv[vi,2]),
-    asInteger(eyv[vi,3]),
+    as.integer(eyv[vi,1]),
+    as.integer(eyv[vi,2]),
+    as.integer(eyv[vi,3]),
     col=pc[vi],
     alpha=eyv[vi,4]/max(eyv[vi,4]),
     xlim=c(0,x),
@@ -500,7 +546,7 @@ getContrast <- function(mat3D, t=1) {
 
 # Helper function to simulate non-parametric background distribution by permutation
 getContrastBackground <- function(mat, gannot, cids, t=1, n=100, size=5, plot=T) {
-  setSeed(0)
+  set.seed(0)
   d <- sapply(seq(along=1:n), function(i) {
     print(i)
     gl <- sample(rownames(mat), size)

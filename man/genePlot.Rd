@@ -14,6 +14,8 @@ genePlot(gl, expmat, gannot, t = 0, weights = rep(1, length(gl)),
 
 \item{gannot}{3D annotation of volume with structure IDs}
 
+\item{t}{Threshold for removing noise; gene energy levels below this threshold will be removed}
+
 \item{weights}{List of relative weights corresponding to gene list; default: weighted equally}
 
 \item{plot}{Boolean of whether to make 3D plot}
@@ -27,7 +29,7 @@ Plot total expression of a set of genes
 \examples{
 data(mat)
 data(gannot3D)
-genePlot('Dcx', mat, gannot3D)
+gp3D <- genePlot('Dcx', mat, gannot3D)
 }
 \keyword{plot}
 

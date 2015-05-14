@@ -15,7 +15,7 @@ getIds(nestedList, name)
 ids A dictionary of Structures that contain the name with their IDs
 }
 \description{
-In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureIDRda. This function allows you to browse Structures by name and ID given a name substring.
+In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureID.rda. This function allows you to browse Structures by name and ID given a name substring.
 }
 \examples{
 data(structureID)

@@ -15,7 +15,7 @@ getStructureIds(nestedList, name)
 cids The Structure's ID and all its children's IDs
 }
 \description{
-In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. With the exception of the "root" structure, each Structure has one parent and denotes a "part-of" relationship. Due to this relationship, a Structure's total volume is denoted by both its own IDs and also that of its children's IDs. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureIDRda. This function allows you to obtain all IDs associated with a Structure given its exact name.
+In the Allen Brain Atlas, a Structure represents a neuroanatomical region of interest. Structures are grouped into Ontologies and organized in a hierarchy or StructureGraph. With the exception of the "root" structure, each Structure has one parent and denotes a "part-of" relationship. Due to this relationship, a Structure's total volume is denoted by both its own IDs and also that of its children's IDs. The StructureGraph for the Developing Mouse Brain Atlas is provided here under data/structureID.rda. This function allows you to obtain all IDs associated with a Structure given its exact name.
 }
 \examples{
 data(structureID)
