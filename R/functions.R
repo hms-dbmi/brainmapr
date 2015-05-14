@@ -525,8 +525,7 @@ getContrastSig <- function(gl, mat, gannot, cids=NA, t=1, n=100, plot=F) {
   gp <- genePlot(gl, mat, gannot, plot=F)
   if (sum(is.na(cids)) == 0) {
     gpsect <- structurePlot(cids, gp, gannot, plot=F)
-  }
-  else {
+  } else {
     gpsect <- gp
   }
   glContrast <- getContrast(gpsect, t=t)

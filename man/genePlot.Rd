@@ -27,7 +27,7 @@ Plot total expression of a set of genes
 \examples{
 data(mat)
 data(gannot3D)
-genePlot('Dcx', mat, gannot3D, plot=F)
+genePlot('Dcx', mat, gannot3D)
 }
 \keyword{plot}
 
