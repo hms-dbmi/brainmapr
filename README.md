@@ -21,6 +21,7 @@ Website: ©2013 Allen Institute for Brain Science. Allen Developing Mouse Brain 
 
 ## Install
 ```
+require(devtools)
 devtools::install_github("JEFworks/brainmapr")
 ```
 
