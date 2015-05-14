@@ -214,7 +214,7 @@ plotSliceXray <- function(mat3D, slice, t=0, add=F) {
 #'
 #' @param mat3D 3D volume
 #' @param slice Index of slice; limited to dimensions of mat3D
-#' @param t Threshold used to remove noise
+#' @param col Color
 #' @param add Boolean whether to overlay onto existing plot
 #'
 #' @examples
@@ -308,8 +308,8 @@ plotEnergy <- function(exp, x, y, z) {
 #' data(vol3D)
 #' data(annot3D)
 #' cids <- getStructureIds(structureID, 'pallium')
-#' structurePlot(cids, vol3D, annot3D)  # For whole structure
-#' structurePlot(cids, array(mat[gene,], dim=dim(gannot3D)), gannot3D)  # For a particular gene
+#' sect3D <- structurePlot(cids, vol3D, annot3D)  # For whole structure
+#' gpsect3D <- structurePlot(cids, array(mat[gene,], dim=dim(gannot3D)), gannot3D)  # For a particular gene
 #'
 #' @keywords plot
 #'
@@ -326,9 +326,10 @@ structurePlot <- function(cids, vol, annot, plot=F) {
 #' Plot total expression of a set of genes
 #'
 #' @param gl Gene list
-#' @param weights List of relative weights corresponding to gene list; default: weighted equally
 #' @param expmat 3D volume of expression
 #' @param gannot 3D annotation of volume with structure IDs
+#' @param t Threshold for removing noise; gene energy levels below this threshold will be removed
+#' @param weights List of relative weights corresponding to gene list; default: weighted equally
 #' @param plot Boolean of whether to make 3D plot
 #'
 #' @return exp3D 3D volume restricted to weighted gene expression set of interest
@@ -336,7 +337,7 @@ structurePlot <- function(cids, vol, annot, plot=F) {
 #' @examples
 #' data(mat)
 #' data(gannot3D)
-#' genePlot('Dcx', mat, gannot3D)
+#' gp3D <- genePlot('Dcx', mat, gannot3D)
 #'
 #' @keywords plot
 #'
