@@ -12,14 +12,12 @@ ISH data are quantified as gene expression energies, defined expression intensit
 
 ### Sample Images
 
-![](sample/mouse_compiled.png)
+![](sample/mouse_compiled.png)  
 Sample images generated using `brainmapr`. a) Projection of an embryonic 13.5 day old mouse; b) Forebrain highlighted structure in a slice of an embryonic 13.5 day old mouse; c) Gene expression signature for a proximal distal group of neurons within the forebrain of an embryonic 13.5 day old mouse  
 
 ---
 
 ## Usage
-
-### Vignettes
 
 Please see the following vignettes for usage examples:  
 - [Getting Started with brainmapr](vignettes/brainmapr-vignette.md) 
