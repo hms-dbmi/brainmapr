@@ -42,7 +42,11 @@ Website: ©2013 Allen Institute for Brain Science. Allen Developing Mouse Brain 
 ### brainmapr
 [coming soon]
 
+---
 
+## Other similar methods:  
+- [Achim K, Pettit JB, Saraiva LR, et al. High-throughput spatial mapping of single-cell RNA-seq data to tissue of origin. Nat Biotechnol. 2015;33(5):503-9.](http://www.ncbi.nlm.nih.gov/pubmed/25867922)  
+- [Satija R, Farrell JA, Gennert D, Schier AF, Regev A. Spatial reconstruction of single-cell gene expression data. Nat Biotechnol. 2015;33(5):495-502.](http://www.ncbi.nlm.nih.gov/pubmed/25867923)  
 
 
 
