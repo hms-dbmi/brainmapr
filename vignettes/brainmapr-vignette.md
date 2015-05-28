@@ -77,8 +77,7 @@ head(rownames(mat))
 ```
 
 ```
-## [1] "1700010L04Rik" "2610109H07Rik" "6330411E07Rik" "6330527O06Rik"
-## [5] "6330581N18Rik" "6430573F11Rik"
+## [1] "Dcx"     "Sox11"   "Cited2"  "Plxna2"  "Neurod6" "Tubb3"
 ```
 
 We can restrict analyses to simply the brain component of interest as opposed to the entire mouse embryo. In this example, let's consider only the midbrain and hindbrain and associated ventricles. Let's plot a projection and slice of just the brain components of interest.
@@ -95,15 +94,6 @@ plotProjection(vol3D, col=colorRampPalette(c("white", "grey"),space="Lab")(100),
 plotProjection(sect3D, t=8, add=T)
 plotSlice(vol3D, s2, col=colorRampPalette(c("white", "grey"),space="Lab")(100), t=8)
 plotSlice(sect3D, s2, t=8, add=T)
-```
-
-```
-## Warning in max(matT, na.rm = T): no non-missing arguments to max;
-## returning -Inf
-```
-
-```
-## Error in image.default(matT, col = col, zlim = c(t, max(matT, na.rm = T)), : invalid z limits
 ```
 
 ![plot of chunk structure plot](figures/brainmapr-structure plot-1.png) ![plot of chunk structure plot](figures/brainmapr-structure plot-2.png) 
@@ -129,10 +119,6 @@ plotSlice(vol3D, s2, col=colorRampPalette(c("white", "grey"),space="Lab")(100), 
 plotSlice(gp3D, s, t=1, add=T)
 ```
 
-```
-## Error in image.default(matT, col = col, zlim = c(t, max(matT, na.rm = T)), : invalid z limits
-```
-
 ![plot of chunk gene1 plot](figures/brainmapr-gene1 plot-1.png) ![plot of chunk gene1 plot](figures/brainmapr-gene1 plot-2.png) 
 
 We may want to restrict viewing expression of a particular gene to just the brain structures of interest. Let's plot expression of `Dcx` gene within the midbrain and hindbrain and associated ventricles.
@@ -144,15 +130,6 @@ plotProjection(vol3D, col=colorRampPalette(c("white", "grey"),space="Lab")(100),
 plotProjection(gpsect3D, t=1, add=T)
 plotSlice(vol3D, s2, col=colorRampPalette(c("white", "grey"),space="Lab")(100), t=8)
 plotSlice(gpsect3D, s, t=1, add=T)
-```
-
-```
-## Warning in max(matT, na.rm = T): no non-missing arguments to max;
-## returning -Inf
-```
-
-```
-## Error in image.default(matT, col = col, zlim = c(t, max(matT, na.rm = T)), : invalid z limits
 ```
 
 ![plot of chunk gene1 structure plot](figures/brainmapr-gene1 structure plot-1.png) ![plot of chunk gene1 structure plot](figures/brainmapr-gene1 structure plot-2.png) 
@@ -178,10 +155,6 @@ plotSlice(vol3D, s2, col=colorRampPalette(c("white", "grey"),space="Lab")(100), 
 plotSlice(gp3D, s, t=1, add=T)
 ```
 
-```
-## Error in image.default(matT, col = col, zlim = c(t, max(matT, na.rm = T)), : invalid z limits
-```
-
 ![plot of chunk gene2 plot](figures/brainmapr-gene2 plot-1.png) ![plot of chunk gene2 plot](figures/brainmapr-gene2 plot-2.png) 
 
 ```r
@@ -190,15 +163,6 @@ plotProjection(vol3D, col=colorRampPalette(c("white", "grey"),space="Lab")(100),
 plotProjection(gpsect3D, t=1, add=T)
 plotSlice(vol3D, s2, col=colorRampPalette(c("white", "grey"),space="Lab")(100), t=8)
 plotSlice(gpsect3D, s, t=1, add=T)
-```
-
-```
-## Warning in max(matT, na.rm = T): no non-missing arguments to max;
-## returning -Inf
-```
-
-```
-## Error in image.default(matT, col = col, zlim = c(t, max(matT, na.rm = T)), : invalid z limits
 ```
 
 ![plot of chunk gene2 structure plot](figures/brainmapr-gene2 structure plot-1.png) ![plot of chunk gene2 structure plot](figures/brainmapr-gene2 structure plot-2.png) 
@@ -226,15 +190,6 @@ plotSlice(vol3D, s2, col=colorRampPalette(c("white", "grey"),space="Lab")(100), 
 plotSlice(gpsect3D, s, t=1, add=T)
 ```
 
-```
-## Warning in max(matT, na.rm = T): no non-missing arguments to max;
-## returning -Inf
-```
-
-```
-## Error in image.default(matT, col = col, zlim = c(t, max(matT, na.rm = T)), : invalid z limits
-```
-
 ![plot of chunk group gene plot](figures/brainmapr-group gene plot-1.png) ![plot of chunk group gene plot](figures/brainmapr-group gene plot-2.png) 
 
 Some times, certain genes contribute more to a neuronal cell subpopulation's gene expression signature. In such a scenario, we would want to weigh gene expressions unequally. Weights to consider using include -log10(p-values or q-values) or log2(fold change). Note weights are relatively. 
@@ -259,15 +214,6 @@ plotProjection(vol3D, col=colorRampPalette(c("white", "grey"),space="Lab")(100),
 plotProjection(gpsect3D, t=1, add=T)
 plotSlice(vol3D, s2, col=colorRampPalette(c("white", "grey"),space="Lab")(100), t=8)
 plotSlice(gpsect3D, s, t=1, add=T)
-```
-
-```
-## Warning in max(matT, na.rm = T): no non-missing arguments to max;
-## returning -Inf
-```
-
-```
-## Error in image.default(matT, col = col, zlim = c(t, max(matT, na.rm = T)), : invalid z limits
 ```
 
 ![plot of chunk group gene weighted plot](figures/brainmapr-group gene weighted plot-1.png) ![plot of chunk group gene weighted plot](figures/brainmapr-group gene weighted plot-2.png) 
