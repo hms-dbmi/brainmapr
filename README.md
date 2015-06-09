@@ -28,7 +28,7 @@ Please see the following vignettes for usage examples:
 ## Install
 ```
 require(devtools)
-devtools::install_github("JEFworks/brainmapr")
+devtools::install_github("hms-dbmi/brainmapr")
 ```
 
 ---
