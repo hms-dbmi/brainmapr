@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Brainmapr by hms-dbmi</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Brainmapr</h1>
+        <p>R package to infer spatial location of neuronal subpopulations within the developing mouse brain by integrating single-cell RNA-seq data with in situ RNA patterns from the Allen Developing Mouse Brain Atlas</p>
+
+        <p class="view"><a href="https://github.com/hms-dbmi/brainmapr">View the Project on GitHub <small>hms-dbmi/brainmapr</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/hms-dbmi/brainmapr/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/hms-dbmi/brainmapr/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/hms-dbmi/brainmapr">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="brainmapr" class="anchor" href="#brainmapr" aria-hidden="true"><span class="octicon octicon-link"></span></a>brainmapr</h1>
+
+<p><a href="https://travis-ci.org/hms-dbmi/brainmapr"><img src="https://travis-ci.org/hms-dbmi/brainmapr.svg?branch=master" alt="Build Status"></a> <a href="http://codecov.io/github/hms-dbmi/brainmapr?branch=master"><img src="http://codecov.io/github/hms-dbmi/brainmapr/coverage.svg?branch=master" alt="codecov.io"></a>  </p>
+
+<p>Spatial localization of neural progenitor cells within the developing mammalian brain plays an important role in neuronal fate determination and maturation. We developed <code>brainmapr</code> to the infer spatial location of neural progenitor subpopulations within the developing mouse brain by integrating single-cell RNA-seq data with in situ RNA patterns from the <a href="http://mouse.brain-map.org/">Allen Developing Mouse Brain Atlas</a>. Putative neural progenitor subpopulations are first identified using single-cell RNA-seq data. <a href="http://pklab.med.harvard.edu/scde/index.html">Single cell differential expression</a> analysis identifies gene expression signatures associated with each subpopulation. In situ expression patterns for these genes then spatially localize each subpopulation to demonstrate spatial segregation of subpopulations. </p>
+
+<p>The <code>brainmapr</code> package comes pre-loaded with a small sample of ISH data for 38 genes in the embryonic 11.5 day old mouse. Additional ISH data for ~2000 genes in convenient RData formats are available for the embryonic 11.5, 13.5, 15.5, 16.5, and 18.5, and post-natal 4, 14, 28, and 56 day old mice and can be downloaded from the <a href="http://pklab.med.harvard.edu/jean/brainmapr/data-raw/">Kharchenko lab website</a> due to file size limitations on GitHub. By providing these data formats, we hope to enable investigators to explore trends in spatial correlation of gene expression or perform other statistical analyses from within the R statistical framework. </p>
+
+<p>ISH data are quantified as gene expression energies, defined expression intensity times expression density, at a grid voxel level. Each voxel corresponds to 100 µm gridding of the original ISH stain images and corresponds to voxel level structure annotations according to the accompanying developmental reference atlas ontology. The 3-D reference model for the developing 13.5 day embryonic mouse derived from Feulgen-HP yellow DNA staining is also used as a higher resolution reference image. Please refer to the <a href="http://help.brain-map.org/display/mousebrain/Documentation">Allen Developing Mouse Brain Atlas Documentation</a> for more information on processes and procedures used to perform ISH, informatics data processing, structure annotation, and more. </p>
+
+<hr>
+
+<h3>
+<a id="sample-images" class="anchor" href="#sample-images" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sample Images</h3>
+
+<p><img src="https://raw.githubusercontent.com/hms-dbmi/brainmapr/master/sample/mouse_compiled.png" alt=""><br>
+Sample images generated using <code>brainmapr</code>. a) Projection of an embryonic 13.5 day old mouse; b) Forebrain highlighted structure in a slice of an embryonic 13.5 day old mouse; c) Gene expression signature for a proximal distal group of neurons within the forebrain of an embryonic 13.5 day old mouse  </p>
+
+<hr>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Please see the following vignettes for usage examples:  </p>
+
+<ul>
+<li>
+<a href="vignettes/brainmapr-vignette.md">Getting Started with brainmapr</a> </li>
+<li>
+<a href="vignettes/pagoda-vignette.md">Practical applications of brainmapr</a><br>
+</li>
+</ul>
+
+<hr>
+
+<h2>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install</h2>
+
+<pre><code>require(devtools)
+devtools::install_github("hms-dbmi/brainmapr")
+</code></pre>
+
+<hr>
+
+<h2>
+<a id="citation" class="anchor" href="#citation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Citation</h2>
+
+<h3>
+<a id="allen-developing-mouse-brain-atlas" class="anchor" href="#allen-developing-mouse-brain-atlas" aria-hidden="true"><span class="octicon octicon-link"></span></a>Allen Developing Mouse Brain Atlas</h3>
+
+<p>Website: ©2013 Allen Institute for Brain Science. Allen Developing Mouse Brain Atlas [Internet]. Available from: <a href="http://developingmouse.brain-map.org">http://developingmouse.brain-map.org</a>.</p>
+
+<h3>
+<a id="brainmapr-1" class="anchor" href="#brainmapr-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>brainmapr</h3>
+
+<p>"Characterizing transcriptional heterogeneity through pathway and gene set overdispersion analysis" (Fan J, Salathia N, Liu R, Kaeser G, Yung Y, Herman J, Kaper F, Fan JB, Zhang K, Chun J, and Kharchenko PV) COMING SOON!</p>
+
+<hr>
+
+<h2>
+<a id="other-similar-methods" class="anchor" href="#other-similar-methods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Other similar methods:</h2>
+
+<ul>
+<li>
+<a href="http://www.ncbi.nlm.nih.gov/pubmed/25867922">Achim K, Pettit JB, Saraiva LR, et al. High-throughput spatial mapping of single-cell RNA-seq data to tissue of origin. Nat Biotechnol. 2015;33(5):503-9.</a><br>
+</li>
+<li>
+<a href="http://www.ncbi.nlm.nih.gov/pubmed/25867923">Satija R, Farrell JA, Gennert D, Schier AF, Regev A. Spatial reconstruction of single-cell gene expression data. Nat Biotechnol. 2015;33(5):495-502.</a><br>
+</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/hms-dbmi">hms-dbmi</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
