@@ -10,7 +10,7 @@ ISH data are quantified as gene expression energies, defined expression intensit
 
 ---
 
-### Sample Images
+## Sample Images
 
 ![](sample/mouse_compiled.png)  
 Sample images generated using `brainmapr`. a) Projection of an embryonic 13.5 day old mouse; b) Forebrain highlighted structure in a slice of an embryonic 13.5 day old mouse; c) Gene expression signature for a proximal distal group of neurons within the forebrain of an embryonic 13.5 day old mouse  
@@ -49,6 +49,10 @@ Website: ©2013 Allen Institute for Brain Science. Allen Developing Mouse Brain 
 - [Achim K, Pettit JB, Saraiva LR, et al. High-throughput spatial mapping of single-cell RNA-seq data to tissue of origin. Nat Biotechnol. 2015;33(5):503-9.](http://www.ncbi.nlm.nih.gov/pubmed/25867922)  
 - [Satija R, Farrell JA, Gennert D, Schier AF, Regev A. Spatial reconstruction of single-cell gene expression data. Nat Biotechnol. 2015;33(5):495-502.](http://www.ncbi.nlm.nih.gov/pubmed/25867923)  
 
+--- 
 
+## Contributing
+
+We welcome any bug reports, enhancement requests, and other contributions. To submit a bug report or enhancement request, please use the [`brainmapr` GitHub issues tracker](https://github.com/hms-dbmi/brainmapr/issues). For more substantial contributions, please fork this repo, push your changes to your fork, and submit a pull request with a good commit message.
 
 
